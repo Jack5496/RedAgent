@@ -4,7 +4,7 @@ import java.util.Random;
 
 public class DiamondSquareGenerator {
     private final int size;
-    private final float initialCorner;
+    public final float initialCorner;
     private final float initialVariance;
     private final float varianceDivisor;
     private final Random random;

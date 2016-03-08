@@ -22,9 +22,6 @@ public class CameraController {
 	private int distanceMax;
 	private int distanceMin;
 
-	private int xAmount;
-	private int yAmount;
-
 	private FrameBuffer fbo;
 	private SpriteBatch fboBatch;
 
@@ -39,8 +36,6 @@ public class CameraController {
 		setScreenSize(width, height);
 		initCamera();
 		initFrameBuffer();
-		xAmount = width / MapTile.tileSize;
-		yAmount = height / MapTile.tileSize;
 		setCamera(0, 0);
 	}
 
@@ -88,14 +83,14 @@ public class CameraController {
 
 		int xStart = (int) (cameraPosition.x / s) * s - 1 * s;
 		int yStart = (int) (cameraPosition.y / s) * s - 1 * s;
-		int xEnd = xStart + width + 1 * s;
-		int yEnd = yStart + height + 1 * s;
+		int xEnd = xStart + width/MapTile.tileSize + 1 * s;
+		int yEnd = yStart + height/MapTile.tileSize + 1 * s;
 
 		Coord begin = new Coord(xStart, yStart);
 		Coord end = new Coord(xEnd, yEnd);
-
-		begin = new Coord(s*5, s*5);
-		end = new Coord(s*6, s*5);
+		
+//		begin = new Coord(s*5, s*5);
+//		end = new Coord(s*6, s*5);
 		
 		
 		

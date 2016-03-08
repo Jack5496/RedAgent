@@ -6,6 +6,7 @@ import com.redagent.game.Main;
 import com.redagent.world.Coord;
 import com.redagent.world.DiamondSquareGenerator;
 import com.redagent.world.MapTile;
+import com.redagent.world.PerlinNoiseGenerator;
 import com.redagent.world.TextureNames;
 import com.redagent.world.TileWorld;
 
@@ -20,11 +21,13 @@ public class NatureGenerator implements GeneratorInterface {
 		this.world = world;
 
 		random = new Random();
-		gen = new DiamondSquareGenerator(chunkSize, 10, 5, 10, random.nextLong());
+		gen = new DiamondSquareGenerator(chunkSize, 50, 5, 2, random.nextLong());
 	}
 
 	private void generate(Coord begin, Coord end, float topLeft, float topRight, float bottomLeft, float bottomRight) {
-		float map[][] = gen.generate(topLeft, topRight, bottomLeft, bottomRight);
+//		float map[][] = gen.generate(topLeft, topRight, bottomLeft, bottomRight);
+		
+		Main.log(getClass(), "generate: "+begin.toString()+" to "+end.toString());
 
 		int xm = 0;
 		int ym = 0;
@@ -33,12 +36,13 @@ public class NatureGenerator implements GeneratorInterface {
 			for (int x = (int) begin.x; x <= end.x; x ++) {
 				Coord c = new Coord(x, y);
 
-				int num = (int) map[xm][ym];
-				int text = 0;
-				if (num > 60)
-					text = 1;
+//				int num = (int) map[xm][ym];
+				float num = PerlinNoiseGenerator.perlin(xm, ym);
 				
-				if(num%10==0) text=2;
+				int div = 100/(TextureNames.tiles.length-1);
+				
+				Main.log(getClass(), ""+div+" t: "+num/div);
+				int text = (int) (num/div);
 				
 				
 //				Main.log(getClass(), ""+num);
@@ -63,7 +67,7 @@ public class NatureGenerator implements GeneratorInterface {
 		Coord bottomRight = getChunkStart(at,1,0);
 		Coord topLeft = getChunkStart(at,0,1);
 		Coord topRight = getChunkStart(at,1,1);
-				
+		
 		generate(bottomLeft, topRight, getDSH(topLeft), getDSH(topRight), getDSH(bottomLeft), getDSH(bottomRight));
 		
 		return world.getMapTile(at);
@@ -88,7 +92,7 @@ public class NatureGenerator implements GeneratorInterface {
 	public float getDSH(Coord c) {
 		if (world.exsistMapTile(c))
 			return world.getMapTile(c).dsh;
-		return random.nextFloat() * 100;
+		return random.nextFloat()*20*(random.nextInt(2)-1)+20;
 	}
 
 	@Override
