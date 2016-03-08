@@ -68,7 +68,7 @@ public class KeyboardHandler {
 		//
 		dir.nor();
 		Player p = Main.getInstance().playerHandler.getPlayerByInput(inputHandlerName);
-		p.move(dir.scl(100));
+		p.move(dir.scl(2));
 		// p.stickLeftDown = keys[Keys.SHIFT_LEFT];
 		// p.stickLeft = CameraController.relativToCamera(dir);
 	}

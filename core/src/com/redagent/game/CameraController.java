@@ -84,16 +84,7 @@ public class CameraController {
 			cameraPosition = new Coord(track.body.getPosition());
 		}
 
-		// Main.log(getClass(), "pos:"+track.getCoord().toString());
-
-		// Main.log(getClass(),
-		// "from:"+(cameraPosition.x-xAmount)+"|"+(cameraPosition.y-yAmount)+"
-		// to:"+(cameraPosition.x+xAmount)+"|"+(cameraPosition.y+yAmount));
-		// for (MapTile tile :
-		// TileWorld.getInstance().getArea(cameraPosition.x-width/2,
-		// cameraPosition.y-height/2, cameraPosition.x+width,
-		// cameraPosition.y+height)) {
-		int s = MapTile.tileSize;
+		int s = 1;
 
 		int xStart = (int) (cameraPosition.x / s) * s - 1 * s;
 		int yStart = (int) (cameraPosition.y / s) * s - 1 * s;
@@ -103,10 +94,15 @@ public class CameraController {
 		Coord begin = new Coord(xStart, yStart);
 		Coord end = new Coord(xEnd, yEnd);
 
+		begin = new Coord(s*5, s*5);
+		end = new Coord(s*6, s*5);
+		
+		
+		
 		for (MapTile tile : TileWorld.getInstance().getArea(begin, end)) {
 			Coord c = cameraPosition.getDifference(tile.getCoord());
 			Texture t = tile.getTexture();
-			fboBatch.draw(t, c.x, c.y, t.getWidth() / 2, t.getHeight() / 2, t.getWidth(), t.getHeight(), 1, 1,
+			fboBatch.draw(t, c.x*MapTile.tileSize, c.y*MapTile.tileSize, t.getWidth() / 2, t.getHeight() / 2, t.getWidth(), t.getHeight(), 1, 1,
 					tile.getRotation(), 1, 1, t.getWidth(), t.getHeight(), false, false);
 		}
 

@@ -24,8 +24,8 @@ public class Coord extends Vector2{
 		super(x,y);
 	}
 
-	public boolean isNeumann(Coord check) {
-		return getNeumann().contains(check);
+	public boolean isNeumann(Coord check, int tileSize) {
+		return getNeumann(tileSize).contains(check);
 	}
 		
 	public Coord getDifference(Vector2 rel){
@@ -35,45 +35,45 @@ public class Coord extends Vector2{
 		return new Coord(s1.sub(s2));
 	}
 
-	public List<Coord> getNeumann() {
+	public List<Coord> getNeumann(int tileSize) {
 		List<Coord> back = new ArrayList<Coord>();
-		back.add(abouve());
-		back.add(under());
-		back.add(left());
-		back.add(right());
+		back.add(abouve(tileSize));
+		back.add(under(tileSize));
+		back.add(left(tileSize));
+		back.add(right(tileSize));
 		return back;
 	}
 
-	public boolean isAbouve(Coord check) {
-		return check == abouve();
+	public boolean isAbouve(Coord check, int tileSize) {
+		return check == abouve(tileSize);
 	}
 
-	public boolean isUnder(Coord check) {
-		return check == under();
+	public boolean isUnder(Coord check, int tileSize) {
+		return check == under(tileSize);
 	}
 
-	public boolean isLeft(Coord check) {
-		return check == left();
+	public boolean isLeft(Coord check, int tileSize) {
+		return check == left(tileSize);
 	}
 
-	public boolean isRight(Coord check) {
-		return check == right();
+	public boolean isRight(Coord check, int tileSize) {
+		return check == right(tileSize);
 	}
 
-	public Coord abouve() {
-		return new Coord(x, y + 1);
+	public Coord abouve(int tileSize) {
+		return new Coord(x, y + tileSize);
 	}
 
-	public Coord under() {
-		return new Coord(x, y - 1);
+	public Coord under(int tileSize) {
+		return new Coord(x, y - tileSize);
 	}
 
-	public Coord left() {
-		return new Coord(x - 1, y);
+	public Coord left(int tileSize) {
+		return new Coord(x - tileSize, y);
 	}
 
-	public Coord right() {
-		return new Coord(x + 1, y);
+	public Coord right(int tileSize) {
+		return new Coord(x + tileSize, y);
 	}
 	
 	public String toString(){

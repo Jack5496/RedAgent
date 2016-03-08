@@ -6,36 +6,20 @@ import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.redagent.game.Main;
-import com.redagent.game.TextureNames;
+import com.redagent.worldgenerator.GeneratorInterface;
+import com.redagent.worldgenerator.NatureGenerator;
 
 public class TileWorld {
 
 	private static TileWorld instance;
+	private GeneratorInterface generator;
 
 	private static ConcurrentHashMap<Coord, MapTile> map;
 
 	public TileWorld() {
 		instance = this;
 		map = new ConcurrentHashMap<Coord, MapTile>();
-		initTestWorld();	
-	}
-
-	private void initTestWorld() {
-		Coord begin = new Coord(-100*MapTile.tileSize, -100*MapTile.tileSize);
-		Coord end = new Coord(100*MapTile.tileSize, 100*MapTile.tileSize);
-		
-		Random random = new Random();
-
-		for (int y = (int) begin.y; y < end.y; y+=MapTile.tileSize) {
-			for (int x = (int) begin.x; x < end.x; x+=MapTile.tileSize) {
-				Coord c = new Coord(x, y);
-				
-				int randomNumber = random.nextInt(TextureNames.tiles.length - 0) + 0;
-				
-				MapTile t = new MapTile(c, false, 0, TextureNames.tiles[randomNumber]);
-				setMapTile(t);
-			}
-		}
+		generator = new NatureGenerator(this);
 	}
 
 	public static TileWorld getInstance() {
@@ -45,13 +29,13 @@ public class TileWorld {
 	public List<MapTile> getArea(int xb, int yb, int xe, int ye) {
 		return getArea(new Coord(xb, yb), new Coord(xe, ye));
 	}
-	
+
 	public List<MapTile> getArea(float xb, float yb, float xe, float ye) {
 		return getArea(new Coord(xb, yb), new Coord(xe, ye));
 	}
 
 	public List<MapTile> getArea(Coord begin, Coord end) {
-		
+
 		int xmin = (int) begin.x;
 		int xmax = (int) begin.x;
 		if (begin.x < end.x) {
@@ -67,30 +51,34 @@ public class TileWorld {
 		} else {
 			ymin = (int) end.y;
 		}
-		
-		xmin+=xmin%MapTile.tileSize;
-		xmax+=xmax%MapTile.tileSize;
-		ymin+=ymin%MapTile.tileSize;
-		ymax+=ymax%MapTile.tileSize;
+
+		xmin += xmin % 1;
+		xmax += xmax % 1;
+		ymin += ymin % 1;
+		ymax += ymax % 1;
 		
 
-		return getAreaCoordsRight(new Coord(xmin, ymin), new Coord(xmax, ymax));
+		Coord beginNew = new Coord(xmin, ymin);
+		Coord endNew = new Coord(xmax, ymax);
+
+
+		return getAreaCoordsRight(beginNew, endNew);
 	}
 
 	private List<MapTile> getAreaCoordsRight(Coord begin, Coord end) {
 		
 		List<MapTile> back = new ArrayList<MapTile>();
-		for (int y = (int) begin.y; y < end.y+1*MapTile.tileSize; y+=MapTile.tileSize) {
-			for (int x = (int) begin.x; x < end.x+1*MapTile.tileSize; x+=MapTile.tileSize) {
-				Coord c = new Coord(x, y);
-				
+		for (int y = (int) begin.y; y < end.y + 1 ; y ++) {
+			for (int x = (int) begin.x; x < end.x + 1 ; x ++) {
+				Coord c = new Coord(x, y);				
 				if (exsistMapTile(c)) {
 					back.add(getMapTile(c));
+				} else {
+					
+					back.add(generator.generateTileAt(c));
 				}
 			}
 		}
-
-		 
 		return back;
 	}
 

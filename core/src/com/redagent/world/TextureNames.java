@@ -1,4 +1,4 @@
-package com.redagent.game;
+package com.redagent.world;
 
 public class TextureNames{
 	
