@@ -81,8 +81,7 @@ public class Main extends ApplicationAdapter {
 		// Sprite1's Physics body
 		BodyDef bodyDef = new BodyDef();
 		bodyDef.type = BodyDef.BodyType.KinematicBody;
-		bodyDef.position.set((sprite.getX() + sprite.getWidth() / 2) / PIXELS_TO_METERS,
-				(sprite.getY() + sprite.getHeight() / 2) / PIXELS_TO_METERS);
+		bodyDef.position.set(51715,50831);
 
 		body = world.createBody(bodyDef);
 
@@ -215,6 +214,7 @@ public class Main extends ApplicationAdapter {
 
 		for (Player p : players) {
 			p.cameraController.renderToFrameBuffer();
+			p.cameraController.renderToUIBuffer();
 			p.cameraController.renderToScreen();
 		}
 	}

@@ -3,10 +3,8 @@ package com.redagent.Inputs;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 import com.redagent.game.Main;
 import com.redagent.player.Player;
-import com.redagent.world.Coord;
 
 public class KeyboardHandler {
 
@@ -45,11 +43,6 @@ public class KeyboardHandler {
 		// }
 	}
 
-	// Vector3(-1, 0, 0)); //left
-	// Vector3(1, 0, 0)); //right
-	// Vector3(0, 0, -1)); //up
-	// Vector3(0, 0, 1)); //down
-
 	public void updateLeftStick() {
 		Vector2 dir = new Vector2(0, 0);
 
@@ -69,7 +62,9 @@ public class KeyboardHandler {
 		
 		dir.nor();
 		Player p = Main.getInstance().playerHandler.getPlayerByInput(inputHandlerName);
-		p.move(dir.scl(20));
+//		p.move(dir.scl(20));
+		dir = dir.scl(.2f);
+		p.cameraController.camera.position.add(dir.x, dir.y, 0);
 		// p.stickLeftDown = keys[Keys.SHIFT_LEFT];
 		// p.stickLeft = CameraController.relativToCamera(dir);
 	}
@@ -102,17 +97,6 @@ public class KeyboardHandler {
 
 		return false;
 	}
-
-	// public float getYawInDegreeOfModelWithMouse(int screenX, int screenY,
-	// Vector3 track) {
-	// Vector3 mv = Helper.getMousePointAt(screenX, screenY);
-	// return Helper.getYawInDegree(mv, track);
-	// }
-
-	// public void updateRightStick(int screenX, int screenY) {
-	// p.setRotation(getYawInDegreeOfModelWithMouse(screenX, screenY,
-	// p.getModelInstance()));
-	// }
 
 	public boolean mouseMoved(int screenX, int screenY) {
 		// Vector3 dir = new Vector3(1, 0, 0);
@@ -155,7 +139,7 @@ public class KeyboardHandler {
 
 	public boolean scrolled(int amount) {
 		Player p = Main.getInstance().playerHandler.getPlayerByInput(inputHandlerName);
-		// p.cameraController.distanceAdd(amount);
+		 p.cameraController.changeDistance(amount);
 		return true;
 	}
 

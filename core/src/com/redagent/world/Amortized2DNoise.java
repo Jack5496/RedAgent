@@ -11,7 +11,8 @@
 /// Demo by Pablo Nuñez.
 /// Last updated January 31, 2014.
 
-package amortized2dnoise;
+package com.redagent.world;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Random;
@@ -24,7 +25,13 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-
+import com.redagent.game.Main;
+import com.redagent.materials.Grass;
+import com.redagent.materials.Sand;
+import com.redagent.materials.Stone;
+import com.redagent.materials.Tree;
+import com.redagent.materials.Water;
+import com.redagent.worldgenerator.NatureGenerator;
 
 public class Amortized2DNoise {
 	float[] uax, vax, ubx, vbx, uay, vay, uby, vby; // /< Amortized noise
@@ -33,8 +40,8 @@ public class Amortized2DNoise {
 	float[][] workspace; // /< Temporary workspace.
 	int size; // /< Size of workspace.
 
-	public static int CELLSIZE2D = App.cellSize;
-	
+	public static int CELLSIZE2D = Chunk.chunkSize;
+
 	Pixmap pixmap;
 
 	public ArrayList<Texture> textures = new ArrayList<Texture>();
@@ -92,7 +99,8 @@ public class Amortized2DNoise {
 		long xl = (long) x;
 		return (int) (1664525L * xl * xl + 1013904223L); // constants from the
 															// book
-															// "Numerical Recipes"
+															// "Numerical
+															// Recipes"
 	} // h1
 
 	// / A 2D hash function.
@@ -276,9 +284,9 @@ public class Amortized2DNoise {
 		return new Color((float) r / 255, (float) g / 255, (float) b / 255, a);
 	}
 
-	public Texture Generate2DNoise(float[][] cell, int octave0, int octave1,
-			int nRow, int nCol) {
-		// printf("Generating %d octaves of 2D noise with persistence 0.5 and lacunarity 2.0\n",octave1
+	public MapTile[][] Generate2DNoise(Chunk c, MapTile[][] tiles, float[][] cell, int octave0, int octave1, int nRow, int nCol) {
+		// printf("Generating %d octaves of 2D noise with persistence 0.5 and
+		// lacunarity 2.0\n",octave1
 		// - octave0 + 1);
 		int t = 0; // timeGetTime(); //start time
 
@@ -287,51 +295,74 @@ public class Amortized2DNoise {
 			nRow = nRow * 2;
 		}
 
-		Pixmap pix = new Pixmap(CELLSIZE2D, CELLSIZE2D, Format.RGBA8888);
 		float scale = generate(nCol, nRow, octave0, octave1, CELLSIZE2D, cell);
 
-		//float seaLevel = 0.5f;
+		// float seaLevel = 0.5f;
+
+		float seaLevel = NatureGenerator.seaLevel;
+		float sandAmount = NatureGenerator.sandAmount;
+		
+		
+		int sand = 0;
+		int grass = 0;
+		int water = 0;
+		int stone = 0;
 		
 		for (int cy = 0; cy < CELLSIZE2D; cy++) {
 			for (int cx = 0; cx < CELLSIZE2D; cx++) {
-				if (cell[cx][cy] >= App.seaLevel && cell[cx][cy] <= App.seaLevel+App.sandAmount)
+				if (cell[cx][cy] >= seaLevel && cell[cx][cy] <= seaLevel + sandAmount) {
 					// Sand
-					pix.setColor(colorConv(255, 236, 139, 1));
-				if (cell[cx][cy] > App.seaLevel+0.1f && cell[cx][cy] <= App.seaLevel+0.4f)
+//					pix.setColor(colorConv(255, 236, 139, 1));
+					sand++;
+					tiles[cx][cy] = new MapTile(c, cx, cy, false, MapTile.DIRECTION_NORTH, new Sand());
+				}
+				if (cell[cx][cy] > seaLevel + 0.1f && cell[cx][cy] <= seaLevel + 0.4f) {
 					// Grass
-					pix.setColor(colorConv(188, 238, 104, 1));
-				if (cell[cx][cy] > App.seaLevel+0.4f)
+//					pix.setColor(colorConv(188, 238, 104, 1));
+					grass++;
+					tiles[cx][cy] = new MapTile(c, cx, cy, false, MapTile.DIRECTION_NORTH, new Grass());
+				}
+				if (cell[cx][cy] > seaLevel + 0.4f) {
 					// Rocks
-					pix.setColor(colorConv(128, 128, 105, 1));
-				if (cell[cx][cy] < App.seaLevel)
-					pix.setColor(colorConv(125, 158, 192, 1));
+//					pix.setColor(colorConv(128, 128, 105, 1));
+					stone++;
+					tiles[cx][cy] = new MapTile(c, cx, cy, false, MapTile.DIRECTION_NORTH, new Stone());
+				}
+				if (cell[cx][cy] < seaLevel) {
+//					pix.setColor(colorConv(125, 158, 192, 1));
+					water++;
+					tiles[cx][cy] = new MapTile(c, cx, cy, false, MapTile.DIRECTION_NORTH, new Water());
+				}
 
-				pix.drawPixel(cx, cy);
-				
+//				pix.drawPixel(cx, cy);
+
 			}
 		}
+		
+		Random rand = NatureGenerator.random;
 
 		for (int i = 0; i < CELLSIZE2D * CELLSIZE2D / 400; i++) {
-			int x = App.rand.nextInt(CELLSIZE2D);
-			int y = App.rand.nextInt(CELLSIZE2D);
+			int x = rand.nextInt(CELLSIZE2D);
+			int y = rand.nextInt(CELLSIZE2D);
 			for (int j = 0; j < 10; j++) {
-				int xx = x + App.rand.nextInt(15) - App.rand.nextInt(15);
-				int yy = y + App.rand.nextInt(15) - App.rand.nextInt(15);
+				int xx = x + rand.nextInt(15) - rand.nextInt(15);
+				int yy = y + rand.nextInt(15) - rand.nextInt(15);
 				if (xx >= 0 && yy >= 0 && xx < CELLSIZE2D && yy < CELLSIZE2D) {
 					// Grass
-					if (cell[xx][yy] > App.seaLevel+0.1f && cell[xx][yy] <= App.seaLevel+0.4f) {
-						//Some ugly trees
-						pix.setColor(colorConv(34, 139, 34, 1));
-						pix.drawPixel(xx, yy);
+					if (cell[xx][yy] > seaLevel + 0.1f && cell[xx][yy] <= seaLevel + 0.4f) {
+						// Some ugly trees
+//						pix.setColor(colorConv(34, 139, 34, 1));
+//						pix.drawPixel(xx, yy);
+//						tiles[xx][yy] = new MapTile(c, xx, yy, false, MapTile.DIRECTION_NORTH, new Tree());
 					}
 				}
 			}
 		}
-		
+
 		// Uncomment this to save image file
 		// PixmapIO.writePNG(Gdx.files.local("map" + c + ".png"), pix);
 
-		return (new Texture(pix));
+		return tiles;
 	}
 
 	public void dispose() {
@@ -346,5 +377,5 @@ public class Amortized2DNoise {
 		spline = null;
 		workspace = null;
 	}
-		
+
 }
