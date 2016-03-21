@@ -13,24 +13,19 @@
 
 package com.redagent.world;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Random;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.PixmapIO;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.Pixmap.Format;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.redagent.game.Main;
 import com.redagent.materials.Grass;
 import com.redagent.materials.Sand;
 import com.redagent.materials.Stone;
-import com.redagent.materials.Tree;
 import com.redagent.materials.Water;
+import com.redagent.nature.TallGrass;
+import com.redagent.nature.Tree;
+import com.redagent.physics.Direction;
 import com.redagent.worldgenerator.NatureGenerator;
 
 public class Amortized2DNoise {
@@ -285,84 +280,74 @@ public class Amortized2DNoise {
 	}
 
 	public MapTile[][] Generate2DNoise(Chunk c, MapTile[][] tiles, float[][] cell, int octave0, int octave1, int nRow, int nCol) {
-		// printf("Generating %d octaves of 2D noise with persistence 0.5 and
-		// lacunarity 2.0\n",octave1
-		// - octave0 + 1);
-		int t = 0; // timeGetTime(); //start time
-
 		for (int i = 1; i < octave0; i++) {
 			nCol = nCol * 2;
 			nRow = nRow * 2;
 		}
 
-		float scale = generate(nCol, nRow, octave0, octave1, CELLSIZE2D, cell);
-
-		// float seaLevel = 0.5f;
+		generate(nCol, nRow, octave0, octave1, CELLSIZE2D, cell);
 
 		float seaLevel = NatureGenerator.seaLevel;
 		float sandAmount = NatureGenerator.sandAmount;
 		
-		
-		int sand = 0;
-		int grass = 0;
-		int water = 0;
-		int stone = 0;
-		
 		for (int cy = 0; cy < CELLSIZE2D; cy++) {
 			for (int cx = 0; cx < CELLSIZE2D; cx++) {
 				if (cell[cx][cy] >= seaLevel && cell[cx][cy] <= seaLevel + sandAmount) {
-					// Sand
-//					pix.setColor(colorConv(255, 236, 139, 1));
-					sand++;
-					tiles[cx][cy] = new MapTile(c, cx, cy, false, MapTile.DIRECTION_NORTH, new Sand());
+					tiles[cx][cy] = new MapTile(c, cx, cy, false, Direction.NORTH, new Sand());
 				}
 				if (cell[cx][cy] > seaLevel + 0.1f && cell[cx][cy] <= seaLevel + 0.4f) {
-					// Grass
-//					pix.setColor(colorConv(188, 238, 104, 1));
-					grass++;
-					tiles[cx][cy] = new MapTile(c, cx, cy, false, MapTile.DIRECTION_NORTH, new Grass());
+					tiles[cx][cy] = new MapTile(c, cx, cy, false, Direction.NORTH, new Grass());
 				}
 				if (cell[cx][cy] > seaLevel + 0.4f) {
-					// Rocks
-//					pix.setColor(colorConv(128, 128, 105, 1));
-					stone++;
-					tiles[cx][cy] = new MapTile(c, cx, cy, false, MapTile.DIRECTION_NORTH, new Stone());
+					tiles[cx][cy] = new MapTile(c, cx, cy, false, Direction.NORTH, new Stone());
 				}
 				if (cell[cx][cy] < seaLevel) {
-//					pix.setColor(colorConv(125, 158, 192, 1));
-					water++;
-					tiles[cx][cy] = new MapTile(c, cx, cy, false, MapTile.DIRECTION_NORTH, new Water());
+					tiles[cx][cy] = new MapTile(c, cx, cy, false, Direction.NORTH, new Water());
 				}
-
-//				pix.drawPixel(cx, cy);
-
 			}
 		}
 		
-		Random rand = NatureGenerator.random;
+		
 
 		for (int i = 0; i < CELLSIZE2D * CELLSIZE2D / 400; i++) {
-			int x = rand.nextInt(CELLSIZE2D);
-			int y = rand.nextInt(CELLSIZE2D);
-			for (int j = 0; j < 10; j++) {
-				int xx = x + rand.nextInt(15) - rand.nextInt(15);
-				int yy = y + rand.nextInt(15) - rand.nextInt(15);
-				if (xx >= 0 && yy >= 0 && xx < CELLSIZE2D && yy < CELLSIZE2D) {
-					// Grass
-					if (cell[xx][yy] > seaLevel + 0.1f && cell[xx][yy] <= seaLevel + 0.4f) {
-						// Some ugly trees
-//						pix.setColor(colorConv(34, 139, 34, 1));
-//						pix.drawPixel(xx, yy);
-//						tiles[xx][yy] = new MapTile(c, xx, yy, false, MapTile.DIRECTION_NORTH, new Tree());
+			randomTree(cell,tiles);
+			randomGrass(cell,tiles);
+		}
+
+		return tiles;
+	}
+	
+	private void randomGrass(float[][] cell, MapTile[][] tiles){
+		Random rand = NatureGenerator.random;
+		int x = rand.nextInt(CELLSIZE2D);
+		int y = rand.nextInt(CELLSIZE2D);
+		for (int j = 0; j < 10; j++) {
+			int xx = x + rand.nextInt(15) - rand.nextInt(15);
+			int yy = y + rand.nextInt(15) - rand.nextInt(15);
+			if (xx >= 0 && yy >= 0 && xx < CELLSIZE2D && yy < CELLSIZE2D) {
+				if (tiles[xx][yy].material.isSame(Grass.class)) {
+					if(tiles[xx][yy].nature==null){
+					tiles[xx][yy].nature = new TallGrass();
 					}
 				}
 			}
 		}
-
-		// Uncomment this to save image file
-		// PixmapIO.writePNG(Gdx.files.local("map" + c + ".png"), pix);
-
-		return tiles;
+	}
+	
+	private void randomTree(float[][] cell, MapTile[][] tiles){
+		Random rand = NatureGenerator.random;
+		int x = rand.nextInt(CELLSIZE2D);
+		int y = rand.nextInt(CELLSIZE2D);
+		for (int j = 0; j < 10; j++) {
+			int xx = x + rand.nextInt(15) - rand.nextInt(15);
+			int yy = y + rand.nextInt(15) - rand.nextInt(15);
+			if (xx >= 0 && yy >= 0 && xx < CELLSIZE2D && yy < CELLSIZE2D) {
+				if (tiles[xx][yy].material.isSame(Grass.class)) {
+					tiles[xx][yy].nature = new Tree();
+					tiles[xx][yy].setSolid(true);
+				}
+			}
+		}
 	}
 
 	public void dispose() {

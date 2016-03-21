@@ -11,7 +11,7 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.Vector3;
-import com.redagent.player.Player;
+import com.redagent.entitys.LocalPlayer;
 
 public class Ingame implements Menu {
 

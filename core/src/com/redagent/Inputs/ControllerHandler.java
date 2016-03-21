@@ -5,8 +5,8 @@ import com.badlogic.gdx.controllers.ControllerListener;
 import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.controllers.PovDirection;
 import com.badlogic.gdx.math.Vector3;
+import com.redagent.entitys.LocalPlayer;
 import com.redagent.game.Main;
-import com.redagent.player.Player;
 
 public class ControllerHandler implements ControllerListener {
 
@@ -17,7 +17,7 @@ public class ControllerHandler implements ControllerListener {
 	public void updateInputLogic() {
 		
 		for (Controller controller : Controllers.getControllers()) {
-			Player p = Main.getInstance().playerHandler.getPlayerByInput("controller:" + controller.hashCode());
+			LocalPlayer p = Main.getInstance().playerHandler.getPlayerByInput("controller:" + controller.hashCode());
 			updateWalkDir(p,controller);
 			updateLookDir(p,controller);
 			updateABXY(p,controller);
@@ -25,7 +25,7 @@ public class ControllerHandler implements ControllerListener {
 		}
 	}
 	
-	public void updateTrigger(Player p, Controller controller){
+	public void updateTrigger(LocalPlayer p, Controller controller){
 		float leftTrigger = controller.getAxis(XBox360Pad.AXIS_LEFT_TRIGGER);
 		if(leftTrigger<2E-5){
 			leftTrigger=0;
@@ -36,26 +36,26 @@ public class ControllerHandler implements ControllerListener {
 			rightTrigger=0;
 		}
 		
-		float thresholdRightTrigger = 0.7f;
+//		float thresholdRightTrigger = 0.7f;
 		
 	}
 
-	public void updateABXY(Player p, Controller controller) {
+	public void updateABXY(LocalPlayer p, Controller controller) {
 			
 	}
 
-	private float threshold = 0.4f; // spielraum, ab 20% wird Stick erst
+//	private float threshold = 0.4f; // spielraum, ab 20% wird Stick erst
 	// gemessen
 
-	public void updateWalkDir(Player p, Controller controller) {
-			float ldy = controller.getAxis(XBox360Pad.AXIS_LEFT_Y);
-			float ldx = controller.getAxis(XBox360Pad.AXIS_LEFT_X);
+	public void updateWalkDir(LocalPlayer p, Controller controller) {
+//			float ldy = controller.getAxis(XBox360Pad.AXIS_LEFT_Y);
+//			float ldx = controller.getAxis(XBox360Pad.AXIS_LEFT_X);
 
-			Vector3 vec = new Vector3(ldx, 0, ldy);
+//			Vector3 vec = new Vector3(ldx, 0, ldy);
 			p.stickLeftDown = controller.getButton(XBox360Pad.BUTTON_L3);
 	}
 
-	public void updateLookDir(Player p, Controller controller) {
+	public void updateLookDir(LocalPlayer p, Controller controller) {
 
 			
 	}
@@ -98,7 +98,7 @@ public class ControllerHandler implements ControllerListener {
 		// TODO Auto-generated method stub
 		Main.log(getClass(), "pov: " + povCode + " with " + value);
 		
-		Player p = Main.getInstance().playerHandler.getPlayerByInput("controller:" + controller.hashCode());
+		LocalPlayer p = Main.getInstance().playerHandler.getPlayerByInput("controller:" + controller.hashCode());
 
 		if (value == XBox360Pad.BUTTON_DPAD_DOWN) {
 			p.cameraController.distanceIncrease();

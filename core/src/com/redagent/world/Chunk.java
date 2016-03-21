@@ -18,6 +18,7 @@ import java.util.List;
 
 import com.redagent.game.Main;
 import com.redagent.materials.Grass;
+import com.redagent.physics.Direction;
 import com.redagent.worldgenerator.NatureGenerator;
 
 public class Chunk {
@@ -26,6 +27,7 @@ public class Chunk {
 	public int y;
 
 	public static final int chunkSize = 1024;
+	
 	MapTile[][] tiles;
 
 	public void create(int _x, int _y, Amortized2DNoise noise) {
@@ -53,51 +55,51 @@ public class Chunk {
 				MapTile t = tiles[x][y];
 				if (t.material instanceof Grass) {
 					if (t.isStraightBorderWest()) {
-						t.setDirection(MapTile.DIRECTION_WEST);
+						t.setDirection(Direction.WEST);
 						t.material.setTexture(Grass.GRASS_SAND_STRAIGHT);
 					}
 					if (t.isStraightBorderNorth()) {
-						t.setDirection(MapTile.DIRECTION_NORTH);
+						t.setDirection(Direction.NORTH);
 						t.material.setTexture(Grass.GRASS_SAND_STRAIGHT);
 					}
 					if (t.isStraightBorderSouth()) {
-						t.setDirection(MapTile.DIRECTION_SOUTH);
+						t.setDirection(Direction.SOUTH);
 						t.material.setTexture(Grass.GRASS_SAND_STRAIGHT);
 					}
 					if (t.isStraightBorderEast()) {
-						t.setDirection(MapTile.DIRECTION_EAST);
+						t.setDirection(Direction.EAST);
 						t.material.setTexture(Grass.GRASS_SAND_STRAIGHT);
 					}
 					if(t.isOuterCornerNorth()){
-						t.setDirection(MapTile.DIRECTION_NORTH);
+						t.setDirection(Direction.NORTH);
 						t.material.setTexture(Grass.GRASS__SAND_CORNER_OUTER);
 					}
 					if(t.isOuterCornerEast()){
-						t.setDirection(MapTile.DIRECTION_EAST);
+						t.setDirection(Direction.EAST);
 						t.material.setTexture(Grass.GRASS__SAND_CORNER_OUTER);
 					}
 					if(t.isOuterCornerSouth()){
-						t.setDirection(MapTile.DIRECTION_SOUTH);
+						t.setDirection(Direction.SOUTH);
 						t.material.setTexture(Grass.GRASS__SAND_CORNER_OUTER);
 					}
 					if(t.isOuterCornerWest()){
-						t.setDirection(MapTile.DIRECTION_WEST);
+						t.setDirection(Direction.WEST);
 						t.material.setTexture(Grass.GRASS__SAND_CORNER_OUTER);
 					}
 					if(t.isInnerCornerNorth()){
-						t.setDirection(MapTile.DIRECTION_NORTH);
+						t.setDirection(Direction.NORTH);
 						t.material.setTexture(Grass.GRASS__SAND_CORNER_INNER);
 					}
 					if(t.isInnerCornerEast()){
-						t.setDirection(MapTile.DIRECTION_EAST);
+						t.setDirection(Direction.EAST);
 						t.material.setTexture(Grass.GRASS__SAND_CORNER_INNER);
 					}
 					if(t.isInnerCornerSouth()){
-						t.setDirection(MapTile.DIRECTION_SOUTH);
+						t.setDirection(Direction.SOUTH);
 						t.material.setTexture(Grass.GRASS__SAND_CORNER_INNER);
 					}
 					if(t.isInnerCornerWest()){
-						t.setDirection(MapTile.DIRECTION_WEST);
+						t.setDirection(Direction.WEST);
 						t.material.setTexture(Grass.GRASS__SAND_CORNER_INNER);
 					}
 				}
@@ -160,8 +162,8 @@ public class Chunk {
 	
 	private List<MapTile> getMapTilesFromLocalPosRightCoord(int xLeft, int yTop, int xRight, int yBottom){
 		List<MapTile> back = new ArrayList<MapTile>();
-		for (int y = yTop; y > yBottom; y--) {
-		for (int x = xLeft; x < xRight; x++) {
+		for (int y = yTop; y >= yBottom; y--) {
+		for (int x = xLeft; x <= xRight; x++) {
 				back.add(tiles[x][y]);
 			}
 		}

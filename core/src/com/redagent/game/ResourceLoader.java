@@ -21,27 +21,12 @@ public class ResourceLoader{
 	
 	public static String data = "data/";
 	public static String entitys = data+"entitys/";
+	public static String shaddows = entitys+"shaddows/";
 	public static String player = entitys+"player.png";
 	
 	public static String tiles = data+"tiles/";
+	public static String nature = data+"nature/";
 	
-//	public void loadAll(){
-//		addToLoad();
-//		float progress = 0;
-//		Main.log(getClass(), "Loaded: " + assets.getProgress() * 100 + "%");
-//
-//		while (!assets.update()) {
-//			if (progress != assets.getProgress()) {
-//				progress = assets.getProgress();
-//				Main.log(getClass(), "Loaded: " + assets.getProgress() * 100 + "%");
-//			}
-//		}
-//		progress = assets.getProgress();
-//		Main.log(getClass(), "Loaded: " + assets.getProgress() * 100 + "%");
-//		
-//		assets.update();
-//	}
-
 	public void addToLoad(String name) {
 		assets.load(Gdx.files.internal(name).path(), Texture.class);
 	}
@@ -65,8 +50,23 @@ public class ResourceLoader{
 		return assets.get(name);
 	}
 	
+	boolean debug =false;
+	
 	public Texture getTile(String name){
+		if(debug) return getTexture(tiles+"debug/"+name+".png");
 		return getTexture(tiles+name+".png");
+	}
+	
+	public Texture getNatrue(String name){
+		return getTexture(nature+name+".png");
+	}
+	
+	public Texture getShaddow(String name){
+		return getTexture(shaddows+name+".png");
+	}
+	
+	public Texture getCloudShaddow(){
+		return getTexture(data+"shaddow/cloud.png");
 	}
 	
 }

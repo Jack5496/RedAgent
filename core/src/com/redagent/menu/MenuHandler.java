@@ -1,14 +1,14 @@
 package com.redagent.menu;
 
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
-import com.redagent.player.Player;
+import com.redagent.entitys.LocalPlayer;
 
 public class MenuHandler {
 
 	public Menu activMenu;
-	public Player p;
+	public LocalPlayer p;
 	
-	public MenuHandler(Player p){
+	public MenuHandler(LocalPlayer p){
 		activMenu = new Ingame(this);
 		this.p = p;
 	}

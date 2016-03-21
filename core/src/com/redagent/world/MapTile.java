@@ -4,36 +4,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.redagent.game.Main;
-import com.redagent.game.ResourceLoader;
+import com.badlogic.gdx.math.Vector2;
 import com.redagent.helper.ArrayHelper;
+import com.redagent.helper.SpriteEntity;
 import com.redagent.materials.Material;
-import com.redagent.materials.Tree;
+import com.redagent.nature.Nature;
+import com.redagent.physics.Direction;
 
-public class MapTile {
+public class MapTile extends SpriteEntity{
 
 	public final static int tileSize = 64;
 
-	public static int DIRECTION_SOUTH = 0;
-	public static int DIRECTION_EAST = 1;
-	public static int DIRECTION_NORTH = 2;
-	public static int DIRECTION_WEST = 3;
-
 	public int direction;
 	private boolean solid;
-	BodyDef body;
 
 	public Material material;
+	public Nature nature;
 
 	public Chunk chunk;
-	public int x;
-	public int y;
 
 	public MapTile(Chunk c, int x, int y, boolean solid, int direction, Material m) {
-		body = new BodyDef();
-		this.x = x;
-		this.y = y;
+		lastPos = new Vector2(x,y);
 		this.chunk = c;
 		setDirection(direction);
 		setSolid(solid);
@@ -41,8 +32,8 @@ public class MapTile {
 	}
 
 	private MapTile getOffset(int xi, int yi) {
-		xi = x + xi;
-		yi = y + yi;
+		xi = (int) (lastPos.x + xi);
+		yi = (int) (lastPos.y + yi);
 
 		if (xi < 0 || xi > Chunk.chunkSize || yi < 0 || yi > Chunk.chunkSize) {
 			return null;
@@ -55,24 +46,26 @@ public class MapTile {
 	}
 
 	public int getGlobalX() {
-		return chunk.x * Chunk.chunkSize + x;
+		return (int) (chunk.x * Chunk.chunkSize + lastPos.x);
 	}
 
 	public int getGlobalY() {
-		return chunk.y * Chunk.chunkSize + y;
+		return (int) (chunk.y * Chunk.chunkSize + lastPos.y);
 	}
 
 	public void setSolid(boolean solid) {
 		this.solid = solid;
-		if (solid) {
-			body.type = BodyDef.BodyType.StaticBody;
-		} else {
-			// body.t
-		}
 	}
 
-	public Texture getTexture() {
+	public Texture getMaterialTexture() {
 		return material.getTexture();
+	}
+
+	public Texture getNatureTexture() {
+		if (nature == null) {
+			return null;
+		}
+		return nature.getTexture();
 	}
 
 	public boolean isSolid() {
@@ -81,6 +74,30 @@ public class MapTile {
 
 	public void setDirection(int dir) {
 		this.direction = dir;
+	}
+
+	public MapTile getTileInDirection(int direction) {
+		int x = 0;
+		int y = 0;
+
+		switch (direction) {
+		case Direction.NORTH:
+			y++;
+			break;
+		case Direction.EAST:
+			x++;
+			break;
+		case Direction.SOUTH:
+			y--;
+			break;
+		case Direction.WEST:
+			x--;
+			break;
+		default:
+			return null;
+		}
+
+		return getOffset(x, y);
 	}
 
 	public MapTile getLeft() {
@@ -164,19 +181,19 @@ public class MapTile {
 	}
 
 	public boolean isInnerCornerNorth() {
-		return isInnerCorner(DIRECTION_NORTH);
+		return isInnerCorner(Direction.NORTH);
 	}
 
 	public boolean isInnerCornerEast() {
-		return isInnerCorner(DIRECTION_EAST);
+		return isInnerCorner(Direction.EAST);
 	}
 
 	public boolean isInnerCornerSouth() {
-		return isInnerCorner(DIRECTION_SOUTH);
+		return isInnerCorner(Direction.SOUTH);
 	}
 
 	public boolean isInnerCornerWest() {
-		return isInnerCorner(DIRECTION_WEST);
+		return isInnerCorner(Direction.WEST);
 	}
 
 	private List<boolean[][]> getOuterCornerTopRight() {
@@ -184,13 +201,12 @@ public class MapTile {
 		boolean[][] up = { { false, false, false }, { false, true, true }, { true, true, true } };
 		boolean[][] down = { { false, false, true }, { false, true, true }, { false, true, true } };
 		boolean[][] all = { { false, false, false }, { false, true, true }, { false, true, true } };
-		
+
 		List<boolean[][]> back = new ArrayList<boolean[][]>();
 		back.add(three);
 		back.add(all);
 		back.add(up);
 		back.add(down);
-
 
 		return back;
 	}
@@ -206,19 +222,19 @@ public class MapTile {
 	}
 
 	public boolean isOuterCornerNorth() {
-		return isOuterCorner(DIRECTION_NORTH);
+		return isOuterCorner(Direction.NORTH);
 	}
 
 	public boolean isOuterCornerSouth() {
-		return isOuterCorner(DIRECTION_SOUTH);
+		return isOuterCorner(Direction.SOUTH);
 	}
 
 	public boolean isOuterCornerEast() {
-		return isOuterCorner(DIRECTION_EAST);
+		return isOuterCorner(Direction.EAST);
 	}
 
 	public boolean isOuterCornerWest() {
-		return isOuterCorner(DIRECTION_WEST);
+		return isOuterCorner(Direction.WEST);
 	}
 
 	private List<boolean[][]> getStraightBorderSouth() {
@@ -246,19 +262,19 @@ public class MapTile {
 	}
 
 	public boolean isStraightBorderNorth() {
-		return checkStraightBorder(DIRECTION_NORTH);
+		return checkStraightBorder(Direction.NORTH);
 	}
 
 	public boolean isStraightBorderEast() {
-		return checkStraightBorder(DIRECTION_EAST);
+		return checkStraightBorder(Direction.EAST);
 	}
 
 	public boolean isStraightBorderSouth() {
-		return checkStraightBorder(DIRECTION_SOUTH);
+		return checkStraightBorder(Direction.SOUTH);
 	}
 
 	public boolean isStraightBorderWest() {
-		return checkStraightBorder(DIRECTION_WEST);
+		return checkStraightBorder(Direction.WEST);
 	}
 
 }

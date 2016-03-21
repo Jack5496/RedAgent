@@ -1,24 +1,14 @@
 package com.redagent.materials;
 
 import com.badlogic.gdx.graphics.Texture;
-import com.redagent.game.Main;
 import com.redagent.game.ResourceLoader;
+import com.redagent.nature.Nature;
 
-public class Material{
+public class Material extends Nature{
 	
-	public String texture;
-	
+	@Override
 	public Texture getTexture(){
 		if(texture==null) return ResourceLoader.getInstance().getTile("error");
 		return ResourceLoader.getInstance().getTile(texture);
-	}
-	
-	public void setTexture(String tex){
-		this.texture = tex;
-	}
-	
-	public boolean isSame(Material m){
-		return this.getClass()==m.getClass();
-	}
-	
+	}	
 }

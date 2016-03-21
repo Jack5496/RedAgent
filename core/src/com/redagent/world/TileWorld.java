@@ -3,10 +3,7 @@ package com.redagent.world;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.redagent.game.Main;
-import com.redagent.materials.Grass;
-import com.redagent.materials.Material;
-import com.redagent.materials.Sand;
+import com.badlogic.gdx.math.Vector2;
 import com.redagent.worldgenerator.GeneratorInterface;
 import com.redagent.worldgenerator.NatureGenerator;
 
@@ -54,6 +51,11 @@ public class TileWorld {
 			yTop = h;
 		}
 		
+		yBottom = checkGloablPosBoundary(yBottom);
+		yTop = checkGloablPosBoundary(yTop);
+		xLeft = checkGloablPosBoundary(xLeft);
+		xRight = checkGloablPosBoundary(xRight);
+		
 		List<MapTile> back = new ArrayList<MapTile>();
 		for (int y = yTop; y > yBottom - 1; y--) {
 			for (int x = xLeft; x < xRight + 1; x++) {
@@ -70,6 +72,20 @@ public class TileWorld {
 		
 		return back;
 	}
+	
+	public int checkGloablPosBoundary(int gx){
+		if(gx<0)return 0;
+		if(gx>worldSize*Chunk.chunkSize)return worldSize*Chunk.chunkSize;
+		return gx;
+	}
+	
+	public Vector2 checkGlobalPosBoundary(Vector2 v){
+		return new Vector2(checkGloablPosBoundary((int)v.x),checkGloablPosBoundary((int)v.y));
+	}
+	
+	public MapTile getMapTileFromGlobalPos(int gx, int gy){
+		return getMapTile(getChunkGlobalPos(gx,gy),gx%Chunk.chunkSize,gy%Chunk.chunkSize);
+	}
 
 	public static int globalPosToChunkPos(int gx) {
 		return gx / Chunk.chunkSize;
@@ -82,12 +98,18 @@ public class TileWorld {
 	public boolean exsistChunkTile(int cx, int cy) {
 		return getChunk(cx, cy) != null;
 	}
+	
+	public Chunk getChunkGlobalPos(Vector2 globalV) {
+		return getChunk((int)globalV.x, (int)globalV.y);
+	}
 
 	public Chunk getChunkGlobalPos(int gx, int gy) {
 		return getChunk(globalPosToChunkPos(gx), globalPosToChunkPos(gy));
 	}
 
 	public Chunk getChunk(int cx, int cy) {
+		if(cx < 0 || cx > worldSize) return null;
+		if(cy < 0 || cy > worldSize) return null;		
 		return chunks[cx][cy];
 	}
 

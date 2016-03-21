@@ -1,6 +1,7 @@
 package com.redagent.game;
 
-import java.awt.Font;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.badlogic.gdx.Gdx;
@@ -15,7 +16,12 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.Vector2;
-import com.redagent.player.Entity;
+import com.redagent.entitys.Cloud;
+import com.redagent.entitys.Entity;
+import com.redagent.entitys.LocalPlayer;
+import com.redagent.helper.SpriteEntity;
+import com.redagent.materials.Grass;
+import com.redagent.materials.Sand;
 import com.redagent.world.Chunk;
 import com.redagent.world.MapTile;
 import com.redagent.world.TileWorld;
@@ -33,29 +39,35 @@ public class CameraController {
 	private int width;
 	private int height;
 
-	private float xAmount = 16;
-	private int distanceMax = 100;
-	private int distanceMin = 1;
+	public static float xAmount = 16;
+	// private int xAmountMax = 100;
+	public static int xAmountMax = 250;
+	public static int xAmountMin = 1;
+
+	public boolean showInformations = true;
 
 	private Entity track;
 
 	public CameraController(int width, int height) {
-		setScreenSize(width, height);
-		initCamera();
-		initFrameBuffer();
-		// setCamera(Chunk.chunkSize * TileWorld.worldSize / 2, Chunk.chunkSize
-		// * TileWorld.worldSize / 2);
-		setCamera(51715, 50831);
-
-		// xAmount = this.width / MapTile.tileSize;
-		// yAmount = this.height / MapTile.tileSize;
+		resize(width, height);
+		setCamera(0,0);
 
 		font = new BitmapFont();
 		font.setColor(Color.BLACK);
 	}
 
+	public void resize(int width, int height) {
+		setScreenSize(width, height);
+		initCamera();
+		initFrameBuffer();
+	}
+
 	public float getXAmount() {
 		return xAmount;
+	}
+
+	public float getOnePixelSize() {
+		return getTileSizeByScreenSize() / MapTile.tileSize;
 	}
 
 	public float getTileSizeByScreenSize() {
@@ -69,13 +81,13 @@ public class CameraController {
 	public void moveCamera(float x, float y) {
 		setCamera(camera.position.x + x, camera.position.y + y);
 	}
-	
-	public void moveCamera(Vector2 v){
-		moveCamera(v.x,v.y);
+
+	public void moveCamera(Vector2 v) {
+		moveCamera(v.x, v.y);
 	}
-	
+
 	public void setCamera(Vector2 v) {
-		setCamera(v.x,v.y); 
+		setCamera(v.x, v.y);
 	}
 
 	public void setCamera(float x, float y) {
@@ -114,80 +126,206 @@ public class CameraController {
 
 		fboBatch.begin();
 
-//		if (track != null) {
-//			setCamera(track.body.getPosition());
-//		}
+		if (track != null) {
+			setCamera(track.body.getPosition());
+		}
 
-		int s = 1;
-
-		int camX = (int) (camera.position.x);
-		int camY = (int) (camera.position.y);
-
-		int xStart = camX;
-		int yStart = camY-1;
-		int xEnd = (int) (xStart + getXAmount() +1);
-		int yEnd = (int) (yStart + getYAmount()+2);
-
-		// int xEnd = xStart +1;
-		// int yEnd = yStart +2;
+		int xStart = (int) (camera.position.x - getXAmount() / 2) - 1;
+		int yStart = (int) (camera.position.y - getYAmount() / 2) - 6;
+		int xEnd = (int) (xStart + getXAmount() + 3);
+		int yEnd = (int) (yStart + getYAmount() + 7);
 
 		List<MapTile> area = TileWorld.getInstance().getArea(xStart, yStart, xEnd, yEnd);
 
 		float size = getTileSizeByScreenSize();
+		float scale = getOnePixelSize();
 
-		for (MapTile tile : area) {
-			Texture t = tile.getTexture();
-			float x = tile.getGlobalX() - camera.position.x;
-			float y = tile.getGlobalY() - camera.position.y;
+		drawGround(area);
 
-			fboBatch.draw(t, x * size, y * size, size / 2, size / 2, size, size, 1, 1, tile.getRotation(), 0, 0,
-					t.getWidth(), t.getHeight(), false, false);
+		List<SpriteEntity> spriteEntitys = new ArrayList<SpriteEntity>();
+		spriteEntitys.addAll(area);
+		spriteEntitys.addAll(Main.getInstance().cloudHandler.getClouds());
+		
+		
+		if (track != null) {
+			spriteEntitys.add(track);
 		}
+		Collections.sort(spriteEntitys);
 
-		// if (track != null) {
-		// Coord pos = cameraPosition.getDifference(track.getCoord());
-		// pos.add(width / 2, height / 2);
-		//
-		// Sprite sprite = Main.getInstance().sprite;
-		// sprite.setPosition((pos.x) - sprite.getWidth() / 2, (pos.y) -
-		// sprite.getHeight() / 2);
-		//
-		// Main.getInstance().sprite.setRotation((float)
-		// Math.toDegrees(track.body.getAngle()));
-		//
-		// fboBatch.draw(sprite, sprite.getX(), sprite.getY(),
-		// sprite.getOriginX(), sprite.getOriginY(),
-		// sprite.getWidth(), sprite.getHeight(), sprite.getScaleX(),
-		// sprite.getScaleY(),
-		// sprite.getRotation());
-		//
-		// }
+		for (SpriteEntity e : spriteEntitys) {
+			if (e instanceof MapTile) {
+				MapTile tile = (MapTile) e;
+				float x = tile.getGlobalX() - camera.position.x + getXAmount() / 2;
+				float y = tile.getGlobalY() - camera.position.y + getYAmount() / 2;
+
+				Texture n = tile.getNatureTexture();
+				if (n != null) {
+					Sprite sprite = new Sprite(n);
+					sprite.setPosition((x * size) + size/2-n.getWidth()/2*scale, (y * size));
+
+					// fboBatch.draw(n, x * size, y * size, size / 2, size / 2,
+					// n.getWidth() * scale,
+					// n.getHeight() * scale, 1, 1, 0, 0, 0, n.getWidth(),
+					// n.getHeight(), false, false);
+					
+					fboBatch.draw(sprite, sprite.getX(), sprite.getY(), size / 2, size / 2,
+							sprite.getWidth() * scale, sprite.getHeight() * scale, sprite.getScaleX(),
+							sprite.getScaleY(), sprite.getRotation());
+					
+//					Sprite test = new Sprite(sprite);
+//					Color back = fboBatch.getColor();
+//					fboBatch.setColor(back.r/2, back.g/2, back.b/2, 64);
+//					
+//					fboBatch.draw(test, sprite.getX(), sprite.getY(), sprite.getOriginX(),sprite.getOriginY(),
+//							sprite.getWidth(), sprite.getHeight(), sprite.getScaleX(),
+//							sprite.getScaleY(), tile.getRotation());
+//					
+//					fboBatch.setColor(back);
+					
+				}
+			}
+			else if (e instanceof Entity) {
+				Entity t = (Entity) e;
+
+				Vector2 trackPos = t.getCoord();
+				Vector2 pos = new Vector2(trackPos.x - camera.position.x, trackPos.y - camera.position.y);
+				pos.add(getXAmount() / 2, getYAmount() / 2);
+
+				for (Sprite sprite : t.getSprite()) {
+					sprite.setPosition((pos.x * size) - sprite.getWidth() / 2 * scale,
+							(pos.y * size) - sprite.getHeight() / 2 * scale);
+
+					// sprite.setRotation((float)
+					// Math.toDegrees(track.body.getAngle()));
+
+					fboBatch.draw(sprite, sprite.getX(), sprite.getY(), sprite.getOriginX(), sprite.getOriginY(),
+							sprite.getWidth() * scale, sprite.getHeight() * scale, sprite.getScaleX(),
+							sprite.getScaleY(), sprite.getRotation());
+					
+				
+
+				}
+			}
+			else if(e instanceof Cloud){
+				Cloud c = (Cloud) e;
+				
+				for (Sprite sprite : c.getSprite()) {
+					Vector2 trackPos = c.getCoord();
+					Vector2 pos = new Vector2(trackPos.x - camera.position.x, trackPos.y - camera.position.y);
+					
+					sprite.setPosition((pos.x * size) - sprite.getWidth() / 2 * scale,
+							(pos.y * size) - sprite.getHeight() / 2 * scale);
+
+					fboBatch.draw(sprite, sprite.getX(), sprite.getY(), sprite.getOriginX(), sprite.getOriginY(),
+							sprite.getWidth() * scale, sprite.getHeight() * scale, sprite.getScaleX(),
+							sprite.getScaleY(), sprite.getRotation());
+					
+				
+
+				}
+			}
+
+		}
 
 		fboBatch.end();
 		fbo.end();
 	}
 
-	public void renderToUIBuffer() {
-		fbo.begin();
+	private void drawGround(List<MapTile> area) {
+		float size = getTileSizeByScreenSize();
+		float scale = getOnePixelSize();
 
-		Gdx.gl.glViewport(0, 0, fbo.getWidth(), fbo.getHeight());
+		for (MapTile tile : area) {
+			Sprite sprite = new Sprite(tile.getMaterialTexture());
+			float x = globalPosToScreenPosX(tile.getGlobalX());
+			float y = globalPosToScreenPosY(tile.getGlobalY());
+			
+			sprite.setPosition(x, y);
+			sprite.setOrigin(size/2, size/2);
+			sprite.setSize(sprite.getWidth() * scale, sprite.getHeight() * scale);
+			
+			fboBatch.draw(sprite, sprite.getX(), sprite.getY(), sprite.getOriginX(),sprite.getOriginY(),
+					sprite.getWidth(), sprite.getHeight(), sprite.getScaleX(),
+					sprite.getScaleY(), tile.getRotation());
+			
+			
+		}
+	}
 
-		// nicht clearen
-		// Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+	private float globalPosToScreenPosX(int globalX) {
+		float size = getTileSizeByScreenSize();
+		return (globalX - camera.position.x + getXAmount() / 2) * size;
+	}
 
-		fboBatch.enableBlending();
-		fboBatch.begin();
+	private int screenPosToGlobalPosX(float screenX) {
+		float size = getTileSizeByScreenSize();
+		return (int) (screenX / size + camera.position.x - getXAmount() / 2);
+	}
 
+	private float globalPosToScreenPosY(int globalY) {
+		float size = getTileSizeByScreenSize();
+		return (globalY - camera.position.y + getYAmount() / 2) * size;
+	}
+
+	private int screenPosToGlobalPosY(float screenY) {
+		float size = getTileSizeByScreenSize();
+		return (int) (screenY / size + camera.position.y - getYAmount() / 2);
+	}
+
+	static int line;
+
+	public void renderToInformationBuffer() {
+		if (showInformations) {
+			fbo.begin();
+
+			Gdx.gl.glViewport(0, 0, fbo.getWidth(), fbo.getHeight());
+
+			// nicht clearen
+			// Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT |
+			// GL20.GL_DEPTH_BUFFER_BIT);
+
+			fboBatch.enableBlending();
+			fboBatch.begin();
+
+			// int x = (int) camera.position.x;
+			// int y = (int) camera.position.y;
+
+			Vector2 bodyPos = track.body.getPosition().cpy();
+
+			MapTile standOn = TileWorld.getInstance().getMapTileFromGlobalPos((int) bodyPos.x, (int) bodyPos.y);
+
+			line = 1;
+			drawInformationLine("FPS: " + Gdx.graphics.getFramesPerSecond());
+
+			if (track instanceof LocalPlayer) {
+				LocalPlayer p = (LocalPlayer) track;
+				drawInformationLine("Player: " + Main.getInstance().playerHandler.getPlayerNumber(p));
+			}
+			drawInformationLine("Zoom: xAmount:" + getXAmount());
+			drawInformationLine("Body Chunk: " + standOn.chunk.x + "|" + standOn.chunk.y);
+			drawInformationLine("Body Position: " + bodyPos.x + "|" + bodyPos.y);
+
+			drawInformationLine("Stand On: " + standOn.material.texture);
+			if (standOn.nature != null) {
+				drawInformationLine("Nature: " + standOn.nature.texture);
+			}
+			drawInformationLine("Dir: " + track.body.getLinearVelocity().toString());
+
+			Vector2 mousePos = Main.getInstance().inputHandler.keyboardHandler.mouse.pos.cpy();
+
+			drawInformationLine("Mouse Pos: " + mousePos.toString());
+			drawInformationLine(
+					"Mouse Pos Gloabl: " + screenPosToGlobalPosX(mousePos.x) + "," + screenPosToGlobalPosY(mousePos.y));
+
+			fboBatch.end();
+			fbo.end();
+		}
+	}
+
+	private void drawInformationLine(String s) {
 		float z = font.getLineHeight();
-
-		int x = (int) camera.position.x;
-		int y = (int) camera.position.y;
-
-		font.draw(fboBatch, "FPS: " + Gdx.graphics.getFramesPerSecond(), 10, height - 1 * z);
-		font.draw(fboBatch, "Camera Position: " + x + "|" + y, 10, height - 2 * z);
-		font.draw(fboBatch, "Zoom: xAmount:" + getXAmount(), 10, height - 3 * z);
-		fboBatch.end();
-		fbo.end();
+		font.draw(fboBatch, s, 10, height - line * z);
+		line++;
 	}
 
 	public void renderUI() {
@@ -216,10 +354,10 @@ public class CameraController {
 
 	public void changeDistance(float amount) {
 		xAmount += amount;
-		if (xAmount < 1)
-			xAmount = 1;
-		if (xAmount > 100)
-			xAmount = 100;
+		if (xAmount < xAmountMin)
+			xAmount = xAmountMin;
+		if (xAmount > xAmountMax)
+			xAmount = xAmountMax;
 	}
 
 	public void setTrack(Entity body) {

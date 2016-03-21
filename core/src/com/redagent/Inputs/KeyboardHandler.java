@@ -3,21 +3,21 @@ package com.redagent.Inputs;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.math.Vector2;
+import com.redagent.entitys.LocalPlayer;
 import com.redagent.game.Main;
-import com.redagent.player.Player;
+import com.redagent.physics.Direction;
 
 public class KeyboardHandler {
 
-	public boolean[] keys = new boolean[256];
-	long[] keysTime = new long[256];
-
-	public boolean mouseLeft = false;
-	public boolean mouseRight = false;
+	public KeyBoard keyboard;
+	public Mouse mouse;
 
 	public static String inputHandlerName;
 
 	public KeyboardHandler(InputHandler inputHandler) {
 		inputHandlerName = "Keyboard";
+		keyboard = new KeyBoard();
+		mouse = new Mouse();
 	}
 
 	public void updateInputLogic() {
@@ -27,13 +27,15 @@ public class KeyboardHandler {
 	}
 
 	public void updateMouseInputs() {
-		Player p = Main.getInstance().playerHandler.getPlayerByInput(inputHandlerName);
+		// Player p =
+		// Main.getInstance().playerHandler.getPlayerByInput(inputHandlerName);
 		// p.shoot = mouseLeft;
 		// p.rightClick = mouseRight;
 	}
 
 	public void updateABXY() {
-		Player p = Main.getInstance().playerHandler.getPlayerByInput(inputHandlerName);
+		// Player p =
+		// Main.getInstance().playerHandler.getPlayerByInput(inputHandlerName);
 		// p.jump = keys[Keys.SPACE];
 		//
 		// if(keys[Keys.Z]){
@@ -43,90 +45,85 @@ public class KeyboardHandler {
 		// }
 	}
 
+	boolean cloud = true;
+
 	public void updateLeftStick() {
 		Vector2 dir = new Vector2(0, 0);
+		LocalPlayer p = Main.getInstance().playerHandler.getPlayerByInput(inputHandlerName);
 
-		if (keys[Keys.A]) {
+		if (keyboard.isPressed(Keys.A)) {
 			dir.add(new Vector2(-1, 0)); // left
 		}
-		if (keys[Keys.D]) {
+		if (keyboard.isPressed(Keys.Q)) {
+			dir.add(new Vector2(-1, 1)); // left
+		}
+		if (keyboard.isPressed(Keys.D)) {
 			dir.add(new Vector2(1, 0)); // right
 		}
-		if (keys[Keys.W]) {
+		if (keyboard.isPressed(Keys.W)) {
 			dir.add(new Vector2(0, 1)); // up
 		}
-		if (keys[Keys.S]) {
+		if (keyboard.isPressed(Keys.S)) {
 			dir.add(new Vector2(0, -1)); // down
 		}
-		//
-		
+		if (keyboard.isPressed(Keys.C)) {
+			if (cloud) {
+				Main.log(getClass(), "Spawn Cloud");
+				Main.getInstance().cloudHandler.spawnCloud(p.lastPos);
+				cloud = false;
+			}
+		}
+		if (keyboard.isPressed(Keys.UP)) {
+			Main.getInstance().cloudHandler.windDirection=Direction.NORTH;
+		}
+		if (keyboard.isPressed(Keys.RIGHT)) {
+			Main.getInstance().cloudHandler.windDirection=Direction.EAST;
+		}
+		if (keyboard.isPressed(Keys.DOWN)) {
+			Main.getInstance().cloudHandler.windDirection=Direction.SOUTH;
+		}
+		if (keyboard.isPressed(Keys.LEFT)) {
+			Main.getInstance().cloudHandler.windDirection=Direction.WEST;
+		}
+
+		p.run(keyboard.isPressed(Keys.SHIFT_LEFT, Keys.SHIFT_RIGHT));
+		p.sneak(keyboard.isPressed(Keys.CONTROL_LEFT, Keys.CONTROL_RIGHT));
+
 		dir.nor();
-		Player p = Main.getInstance().playerHandler.getPlayerByInput(inputHandlerName);
-//		p.move(dir.scl(20));
-		dir = dir.scl(.2f);
-		p.cameraController.camera.position.add(dir.x, dir.y, 0);
-		// p.stickLeftDown = keys[Keys.SHIFT_LEFT];
-		// p.stickLeft = CameraController.relativToCamera(dir);
+		p.move(dir);
 	}
 
 	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
 		if (button == Input.Buttons.LEFT) {
-			mouseLeft = false;
+			mouse.left.release();
 		}
 		if (button == Input.Buttons.RIGHT) {
-			mouseRight = false;
+			mouse.right.release();
 		}
-		return false;
-	}
-
-	/**
-	 * Updates every Key Input
-	 */
-	public boolean keyDown(int keycode) {
-		keys[keycode] = true;
-		keysTime[keycode] = System.currentTimeMillis();
 		return true;
 	}
 
-	public boolean keyUp(int keycode) {
-		keys[keycode] = false;
-		return false;
-	}
-
-	public boolean keyTyped(char character) {
-
-		return false;
-	}
-
 	public boolean mouseMoved(int screenX, int screenY) {
-		// Vector3 dir = new Vector3(1, 0, 0);
-		Player p = Main.getInstance().playerHandler.getPlayerByInput(inputHandlerName);
-		//
-		// float yaw = getYawInDegreeOfModelWithMouse(screenX, screenY,
-		// p.getObjPos());
-		// dir = dir.rotate(yaw, 0, 1, 0);
-		//
-		// p.stickRight = dir;
+		mouse.updatePosition(screenX, screenY);
 
 		return true;
 	}
 
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-		// GameClass.log(getClass(), "mouse Down");
-
 		if (button == Input.Buttons.LEFT) {
-			mouseLeft = true;
+			mouse.left.press();
 		}
 		if (button == Input.Buttons.RIGHT) {
-			mouseRight = true;
+			mouse.right.press();
 		}
 
-		return false;
+		return true;
 	}
 
 	public boolean touchDragged(int screenX, int screenY, int pointer) {
 		// Vector3 dir = new Vector3(1, 0, 0);
-		Player p = Main.getInstance().playerHandler.getPlayerByInput(inputHandlerName);
+		// Player p =
+		// Main.getInstance().playerHandler.getPlayerByInput(inputHandlerName);
 		//
 		// float yaw = getYawInDegreeOfModelWithMouse(screenX, screenY,
 		// p.getObjPos());
@@ -134,13 +131,27 @@ public class KeyboardHandler {
 		//
 		// p.stickRight = dir;
 
-		return false;
+		return true;
 	}
 
 	public boolean scrolled(int amount) {
-		Player p = Main.getInstance().playerHandler.getPlayerByInput(inputHandlerName);
-		 p.cameraController.changeDistance(amount);
+		LocalPlayer p = Main.getInstance().playerHandler.getPlayerByInput(inputHandlerName);
+		p.cameraController.changeDistance(amount);
 		return true;
+	}
+
+	public boolean keyTyped(char character) {
+		return true;
+	}
+
+	public boolean keyUp(int keycode) {
+		keyboard.key(keycode).release();
+		return false;
+	}
+
+	public boolean keyDown(int keycode) {
+		keyboard.key(keycode).press();
+		return false;
 	}
 
 }
