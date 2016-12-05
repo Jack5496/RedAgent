@@ -22,10 +22,11 @@ public class LocalPlayer extends Entity {
 	/**
 	 * InputVariables
 	 */
-	public Vector2 stickLeft;
+	private Vector2 stickLeft;
 	public boolean stickLeftDown;
 
-	public Vector2 stickRight;
+	private Vector2 stickRight;
+	public boolean stickRightDown;
 
 	public CameraController cameraController;
 	public MenuHandler menuHandler;
@@ -37,7 +38,7 @@ public class LocalPlayer extends Entity {
 	public int direction;
 
 	public LocalPlayer(String name) {
-		speed = Speed.runSpeed;
+		speed = Speed.walkSpeed;
 		this.name = name;
 		menuHandler = new MenuHandler(this);
 		direction = Direction.SOUTH;
@@ -50,7 +51,7 @@ public class LocalPlayer extends Entity {
 
 	public void sneak(boolean sneak){
 		sneaking = sneak;
-		if(sneak){
+		if(sneaking){
 			speed = Speed.sneakSpeed;
 		}
 	}
@@ -67,14 +68,23 @@ public class LocalPlayer extends Entity {
 		cameraController.setTrack(this);
 	}
 
-	public void move(Vector2 dir) {
-		if (dir.len() != 0) {
-			this.direction = VectorHelper.getDirFromVector(dir);
+	public void setLeftStick(Vector2 dir) {		
+		this.stickLeft = dir.cpy();
+	}
+	
+	public void setRightStick(Vector2 dir){
+
+	}
+	
+	private void updateLeftStick() {
+		
+		if (this.stickLeft.len() != 0) {
+			this.direction = VectorHelper.getDirFromVector(this.stickLeft);
 		}
 
+		Vector2 dir = this.stickLeft.cpy();
 		dir.scl(speed);
 		body.setLinearVelocity(dir);
-
 	}
 
 	public void resetInputVariables() {
@@ -88,6 +98,7 @@ public class LocalPlayer extends Entity {
 	}
 
 	public void updateMyGameObjects() {
+		updateLeftStick();
 		checkValidPosition();
 	}
 

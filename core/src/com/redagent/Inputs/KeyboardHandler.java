@@ -89,8 +89,7 @@ public class KeyboardHandler {
 		p.run(keyboard.isPressed(Keys.SHIFT_LEFT, Keys.SHIFT_RIGHT));
 		p.sneak(keyboard.isPressed(Keys.CONTROL_LEFT, Keys.CONTROL_RIGHT));
 
-		dir.nor();
-		p.move(dir);
+		p.setLeftStick(dir);
 	}
 
 	public boolean touchUp(int screenX, int screenY, int pointer, int button) {

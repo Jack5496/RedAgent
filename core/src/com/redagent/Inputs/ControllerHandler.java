@@ -4,6 +4,7 @@ import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.ControllerListener;
 import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.controllers.PovDirection;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.redagent.entitys.LocalPlayer;
 import com.redagent.game.Main;
@@ -15,14 +16,30 @@ public class ControllerHandler implements ControllerListener {
 	}
 
 	public void updateInputLogic() {
-		
 		for (Controller controller : Controllers.getControllers()) {
 			LocalPlayer p = Main.getInstance().playerHandler.getPlayerByInput("controller:" + controller.hashCode());
-			updateWalkDir(p,controller);
-			updateLookDir(p,controller);
+			updateLeftStick(p,controller);
+			updateRightStick(p,controller);
 			updateABXY(p,controller);
 			updateTrigger(p,controller);
 		}
+	}
+	
+	public void updateLeftStick(LocalPlayer p, Controller controller) {
+		float dy = -controller.getAxis(XBox360Pad.AXIS_LEFT_Y);
+		float dx = controller.getAxis(XBox360Pad.AXIS_LEFT_X);
+		
+//		Vector2 dir = ;
+		p.setLeftStick(new Vector2(dx, dy));
+		p.stickLeftDown = controller.getButton(XBox360Pad.BUTTON_L3);
+	}
+	
+	public void updateRightStick(LocalPlayer p, Controller controller) {
+		float dy = controller.getAxis(XBox360Pad.AXIS_RIGHT_Y);
+		float dx = controller.getAxis(XBox360Pad.AXIS_RIGHT_X);
+
+		p.setRightStick(new Vector2(dx, dy));
+		p.stickRightDown = controller.getButton(XBox360Pad.BUTTON_R3);
 	}
 	
 	public void updateTrigger(LocalPlayer p, Controller controller){
@@ -47,18 +64,8 @@ public class ControllerHandler implements ControllerListener {
 //	private float threshold = 0.4f; // spielraum, ab 20% wird Stick erst
 	// gemessen
 
-	public void updateWalkDir(LocalPlayer p, Controller controller) {
-//			float ldy = controller.getAxis(XBox360Pad.AXIS_LEFT_Y);
-//			float ldx = controller.getAxis(XBox360Pad.AXIS_LEFT_X);
 
-//			Vector3 vec = new Vector3(ldx, 0, ldy);
-			p.stickLeftDown = controller.getButton(XBox360Pad.BUTTON_L3);
-	}
 
-	public void updateLookDir(LocalPlayer p, Controller controller) {
-
-			
-	}
 
 	@Override
 	public void connected(Controller controller) {

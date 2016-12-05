@@ -11,21 +11,21 @@ import com.redagent.physics.Direction;
 public class PlayerSpriteCreator{
 
 	public static List<Sprite> getPlayerSprite(LocalPlayer p){
-//		int dir = p.direction;
-//		boolean east = dir==Direction.EAST;
-//		if(east) dir=Direction.WEST;
-//		
-//		Texture body = ResourceLoader.getInstance().getTexture(ResourceLoader.entitys+"body/"+dir+"-0.png");
-//		Texture head = ResourceLoader.getInstance().getTexture(ResourceLoader.entitys+"head/"+dir+".png");
-//				
-//		Sprite sbody = new Sprite(body);
-//		Sprite shead = new Sprite(head);
-//		
-//		
-//		if(east){
-//			sbody.flip(true, false);
-//			shead.flip(true, false);
-//		}		
+		int dir = p.direction;
+		boolean east = dir==Direction.EAST;
+		if(east) dir=Direction.WEST;
+		
+		Texture body = ResourceLoader.getInstance().getTexture(ResourceLoader.entitys+"body/"+dir+"-0.png");
+		Texture head = ResourceLoader.getInstance().getTexture(ResourceLoader.entitys+"head/"+dir+".png");
+				
+		Sprite sbody = new Sprite(body);
+		Sprite shead = new Sprite(head);
+		
+		
+		if(east){
+			sbody.flip(true, false);
+			shead.flip(true, false);
+		}		
 				
 		List<Sprite> back = new ArrayList<Sprite>();
 		
