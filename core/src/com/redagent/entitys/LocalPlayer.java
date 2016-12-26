@@ -38,12 +38,11 @@ public class LocalPlayer extends Entity {
 	public int direction;
 
 	public LocalPlayer(String name) {
+		super(51721, 50811);
 		speed = Speed.walkSpeed;
 		this.name = name;
 		menuHandler = new MenuHandler(this);
 		direction = Direction.SOUTH;
-		body = Main.getInstance().spawnPlayer();
-		this.lastPos = body.getPosition().cpy();
 		sneaking = false;
 		initCamera();
 		resetInputVariables();
@@ -84,7 +83,7 @@ public class LocalPlayer extends Entity {
 
 		Vector2 dir = this.stickLeft.cpy();
 		dir.scl(speed);
-		body.setLinearVelocity(dir);
+		setVelocity(dir);
 	}
 
 	public void resetInputVariables() {
@@ -103,11 +102,11 @@ public class LocalPlayer extends Entity {
 	}
 
 	private void checkValidPosition() {
-		Vector2 pos = body.getPosition().cpy();
+		Vector2 pos = getPosition();
 
 		if (!validPosition(pos)) {
 			Vector2 diff = pos.cpy();
-			diff = diff.sub(lastPos.cpy());
+			diff = diff.sub(getPosition());
 
 			Vector2 dx = diff.cpy();
 			dx.x = 0;
@@ -115,10 +114,10 @@ public class LocalPlayer extends Entity {
 			Vector2 dy = diff.cpy();
 			dy.y = 0;
 
-			Vector2 op1 = lastPos.cpy().add(dx);
-			Vector2 op2 = lastPos.cpy().add(dy);
+			Vector2 op1 = getPosition().add(dx);
+			Vector2 op2 = getPosition().add(dy);
 
-			Vector2 move = lastPos.cpy();
+			Vector2 move = getPosition();
 
 			if (validPosition(op1)) {
 				move = op1.cpy();
@@ -126,10 +125,10 @@ public class LocalPlayer extends Entity {
 				move = op2.cpy();
 			}
 
-			body.setTransform(move, body.getAngle());
+//			body.setTransform(move, body.getAngle());
 		}
 
-		lastPos = body.getPosition().cpy();
+//		lastPos = body.getPosition().cpy();
 	}
 
 	private boolean validPosition(Vector2 pos) {

@@ -69,7 +69,7 @@ public class KeyboardHandler {
 		if (keyboard.isPressed(Keys.C)) {
 			if (cloud) {
 				Main.log(getClass(), "Spawn Cloud");
-				Main.getInstance().cloudHandler.spawnCloud(p.lastPos);
+				Main.getInstance().cloudHandler.spawnCloud(p.getPosition());
 				cloud = false;
 			}
 		}

@@ -279,7 +279,8 @@ public class Amortized2DNoise {
 		return new Color((float) r / 255, (float) g / 255, (float) b / 255, a);
 	}
 
-	public MapTile[][] Generate2DNoise(Chunk c, MapTile[][] tiles, float[][] cell, int octave0, int octave1, int nRow, int nCol) {
+	public MapTile[][] Generate2DNoise(Chunk c, MapTile[][] tiles, float[][] cell, int octave0, int octave1, int nRow,
+			int nCol) {
 		for (int i = 1; i < octave0; i++) {
 			nCol = nCol * 2;
 			nRow = nRow * 2;
@@ -289,35 +290,41 @@ public class Amortized2DNoise {
 
 		float seaLevel = NatureGenerator.seaLevel;
 		float sandAmount = NatureGenerator.sandAmount;
-		
+
+		boolean onlyGrass = true;
+
 		for (int cy = 0; cy < CELLSIZE2D; cy++) {
 			for (int cx = 0; cx < CELLSIZE2D; cx++) {
-				if (cell[cx][cy] >= seaLevel && cell[cx][cy] <= seaLevel + sandAmount) {
-					tiles[cx][cy] = new MapTile(c, cx, cy, false, Direction.NORTH, new Sand());
-				}
-				if (cell[cx][cy] > seaLevel + 0.1f && cell[cx][cy] <= seaLevel + 0.4f) {
+				if (onlyGrass) {
 					tiles[cx][cy] = new MapTile(c, cx, cy, false, Direction.NORTH, new Grass());
-				}
-				if (cell[cx][cy] > seaLevel + 0.4f) {
-					tiles[cx][cy] = new MapTile(c, cx, cy, false, Direction.NORTH, new Stone());
-				}
-				if (cell[cx][cy] < seaLevel) {
-					tiles[cx][cy] = new MapTile(c, cx, cy, false, Direction.NORTH, new Water());
+				} else {
+
+					if (cell[cx][cy] >= seaLevel && cell[cx][cy] <= seaLevel + sandAmount) {
+						tiles[cx][cy] = new MapTile(c, cx, cy, false, Direction.NORTH, new Sand());
+					}
+					if (cell[cx][cy] > seaLevel + 0.1f && cell[cx][cy] <= seaLevel + 0.4f) {
+						tiles[cx][cy] = new MapTile(c, cx, cy, false, Direction.NORTH, new Grass());
+					}
+					if (cell[cx][cy] > seaLevel + 0.4f) {
+						tiles[cx][cy] = new MapTile(c, cx, cy, false, Direction.NORTH, new Stone());
+					}
+					if (cell[cx][cy] < seaLevel) {
+						tiles[cx][cy] = new MapTile(c, cx, cy, false, Direction.NORTH, new Water());
+					}
+
 				}
 			}
 		}
-		
-		
 
 		for (int i = 0; i < CELLSIZE2D * CELLSIZE2D / 400; i++) {
-			randomTree(cell,tiles);
-			randomGrass(cell,tiles);
+			randomTree(cell, tiles);
+			randomGrass(cell, tiles);
 		}
 
 		return tiles;
 	}
-	
-	private void randomGrass(float[][] cell, MapTile[][] tiles){
+
+	private void randomGrass(float[][] cell, MapTile[][] tiles) {
 		Random rand = NatureGenerator.random;
 		int x = rand.nextInt(CELLSIZE2D);
 		int y = rand.nextInt(CELLSIZE2D);
@@ -326,15 +333,15 @@ public class Amortized2DNoise {
 			int yy = y + rand.nextInt(15) - rand.nextInt(15);
 			if (xx >= 0 && yy >= 0 && xx < CELLSIZE2D && yy < CELLSIZE2D) {
 				if (tiles[xx][yy].material.isSame(Grass.class)) {
-					if(tiles[xx][yy].nature==null){
-					tiles[xx][yy].nature = new TallGrass();
+					if (tiles[xx][yy].nature == null) {
+						tiles[xx][yy].nature = new TallGrass();
 					}
 				}
 			}
 		}
 	}
-	
-	private void randomTree(float[][] cell, MapTile[][] tiles){
+
+	private void randomTree(float[][] cell, MapTile[][] tiles) {
 		Random rand = NatureGenerator.random;
 		int x = rand.nextInt(CELLSIZE2D);
 		int y = rand.nextInt(CELLSIZE2D);

@@ -29,10 +29,10 @@ public class CloudHandler {
 
 		List<Cloud> toFar = new ArrayList<Cloud>();
 		for (Cloud c : getClouds()) {
-			Main.log(getClass(), "CloudPos: "+c.getCoord().toString());
+			Main.log(getClass(), "CloudPos: "+c.getPosition().toString());
 			float minDis = Float.MAX_VALUE;
 			for (LocalPlayer p : players) {
-				float dist = c.getCoord().dst(p.getCoord());
+				float dist = c.getPosition().dst(p.getPosition());
 				if (dist < minDis)
 					minDis = dist;
 			}
@@ -44,7 +44,7 @@ public class CloudHandler {
 			}
 		}
 		for (Cloud c : toFar) {
-			Vector2 pos = c.getCoord();
+			Vector2 pos = c.getPosition();
 			clouds.remove(c);
 			spawnCloud(pos.add(Direction.getVectorFromDirection(windDirection).scl(-1).scl(CameraController.xAmount/2)));
 			Main.log(getClass(), "Cloud to Far away");

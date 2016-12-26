@@ -5,15 +5,16 @@ import java.util.List;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
+import com.redagent.entitys.Entity;
 import com.redagent.helper.ArrayHelper;
-import com.redagent.helper.SpriteEntity;
 import com.redagent.materials.Material;
 import com.redagent.nature.Nature;
 import com.redagent.physics.Direction;
 
-public class MapTile extends SpriteEntity{
+public class MapTile extends Entity{
 
-	public final static int tileSize = 64;
+	public final static int tileWidth = 128;
+	public final static int tileHeight = 64;
 
 	public int direction;
 	private boolean solid;
@@ -24,7 +25,7 @@ public class MapTile extends SpriteEntity{
 	public Chunk chunk;
 
 	public MapTile(Chunk c, int x, int y, boolean solid, int direction, Material m) {
-		lastPos = new Vector2(x,y);
+		super(new Vector2(x,y));
 		this.chunk = c;
 		setDirection(direction);
 		setSolid(solid);
@@ -32,8 +33,8 @@ public class MapTile extends SpriteEntity{
 	}
 
 	private MapTile getOffset(int xi, int yi) {
-		xi = (int) (lastPos.x + xi);
-		yi = (int) (lastPos.y + yi);
+		xi = (int) (this.getPosition().x + xi);
+		yi = (int) (this.getPosition().y + yi);
 
 		if (xi < 0 || xi > Chunk.chunkSize || yi < 0 || yi > Chunk.chunkSize) {
 			return null;
@@ -46,11 +47,11 @@ public class MapTile extends SpriteEntity{
 	}
 
 	public int getGlobalX() {
-		return (int) (chunk.x * Chunk.chunkSize + lastPos.x);
+		return (int) (chunk.x * Chunk.chunkSize + this.getPosition().x);
 	}
 
 	public int getGlobalY() {
-		return (int) (chunk.y * Chunk.chunkSize + lastPos.y);
+		return (int) (chunk.y * Chunk.chunkSize + this.getPosition().y);
 	}
 
 	public void setSolid(boolean solid) {

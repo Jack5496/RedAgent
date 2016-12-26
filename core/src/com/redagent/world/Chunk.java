@@ -48,65 +48,6 @@ public class Chunk {
 		tiles = noise.Generate2DNoise(this, tiles, cell2, NatureGenerator.octave0, NatureGenerator.octave1, y, x);
 	}
 
-	public void smooth() {
-		Main.log(getClass(), "Smooth: start");
-		for (int x = 1; x < tiles.length - 1; x++) {
-			for (int y = 1; y < tiles[x].length - 1; y++) {
-				MapTile t = tiles[x][y];
-				if (t.material instanceof Grass) {
-					if (t.isStraightBorderWest()) {
-						t.setDirection(Direction.WEST);
-						t.material.setTexture(Grass.GRASS_SAND_STRAIGHT);
-					}
-					if (t.isStraightBorderNorth()) {
-						t.setDirection(Direction.NORTH);
-						t.material.setTexture(Grass.GRASS_SAND_STRAIGHT);
-					}
-					if (t.isStraightBorderSouth()) {
-						t.setDirection(Direction.SOUTH);
-						t.material.setTexture(Grass.GRASS_SAND_STRAIGHT);
-					}
-					if (t.isStraightBorderEast()) {
-						t.setDirection(Direction.EAST);
-						t.material.setTexture(Grass.GRASS_SAND_STRAIGHT);
-					}
-					if(t.isOuterCornerNorth()){
-						t.setDirection(Direction.NORTH);
-						t.material.setTexture(Grass.GRASS__SAND_CORNER_OUTER);
-					}
-					if(t.isOuterCornerEast()){
-						t.setDirection(Direction.EAST);
-						t.material.setTexture(Grass.GRASS__SAND_CORNER_OUTER);
-					}
-					if(t.isOuterCornerSouth()){
-						t.setDirection(Direction.SOUTH);
-						t.material.setTexture(Grass.GRASS__SAND_CORNER_OUTER);
-					}
-					if(t.isOuterCornerWest()){
-						t.setDirection(Direction.WEST);
-						t.material.setTexture(Grass.GRASS__SAND_CORNER_OUTER);
-					}
-					if(t.isInnerCornerNorth()){
-						t.setDirection(Direction.NORTH);
-						t.material.setTexture(Grass.GRASS__SAND_CORNER_INNER);
-					}
-					if(t.isInnerCornerEast()){
-						t.setDirection(Direction.EAST);
-						t.material.setTexture(Grass.GRASS__SAND_CORNER_INNER);
-					}
-					if(t.isInnerCornerSouth()){
-						t.setDirection(Direction.SOUTH);
-						t.material.setTexture(Grass.GRASS__SAND_CORNER_INNER);
-					}
-					if(t.isInnerCornerWest()){
-						t.setDirection(Direction.WEST);
-						t.material.setTexture(Grass.GRASS__SAND_CORNER_INNER);
-					}
-				}
-			}
-		}
-	}
-
 	public List<MapTile> getMapTilesFromGlobalPos(int gxs, int gys, int gxe, int gye) {
 		int gx = getGloabalPosX();
 		int gy = getGloabalPosY();

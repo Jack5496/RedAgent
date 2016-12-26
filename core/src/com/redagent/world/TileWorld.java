@@ -61,8 +61,6 @@ public class TileWorld {
 			for (int x = xLeft; x < xRight + 1; x++) {
 				if (!exsistChunkTile(x, y)) {
 					generator.generateChunkAt(x, y);
-					Chunk ch = getChunk(x, y);
-					ch.smooth();
 				}
 				Chunk ch = getChunk(x, y);
 				List<MapTile> chunkBack = ch.getMapTilesFromGlobalPos(xs, ys, xe, ye);

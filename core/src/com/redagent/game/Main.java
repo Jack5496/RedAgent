@@ -9,11 +9,6 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.FixtureDef;
-import com.badlogic.gdx.physics.box2d.PolygonShape;
-import com.badlogic.gdx.physics.box2d.World;
 import com.redagent.Inputs.InputHandler;
 import com.redagent.entitys.CloudHandler;
 import com.redagent.entitys.LocalPlayer;
@@ -33,9 +28,6 @@ public class Main extends ApplicationAdapter {
 	}
 
 	public Sprite sprite, sprite2;
-	public World world;
-	Body body, body2;
-	Body bodyEdgeScreen;
 
 	Matrix4 debugMatrix;
 	OrthographicCamera camera;
@@ -43,9 +35,6 @@ public class Main extends ApplicationAdapter {
 
 
 	final static float PIXELS_TO_METERS = 100f;
-
-	public final short PHYSICS_ENTITY = 0x1; // 0001
-	public final short WORLD_ENTITY = 0x1 << 1; // 0010 or 0x2 in hex
 	
 	
 	private static Main instance;
@@ -77,32 +66,7 @@ public class Main extends ApplicationAdapter {
 		inputHandler = new InputHandler();
 	}
 
-	public float gravityV = 10;
-
-	public Body spawnPlayer() {
-		// Sprite1's Physics body
-		BodyDef bodyDef = new BodyDef();
-		bodyDef.type = BodyDef.BodyType.KinematicBody;
-		bodyDef.position.set(51721, 50811);
-
-		body = world.createBody(bodyDef);
-
-		PolygonShape shape = new PolygonShape();
-		Sprite s = new Sprite(ResourceLoader.getInstance().getShaddow("entity"));
-		shape.setAsBox(s.getWidth()/2, s.getHeight()/2);
-
-		// Sprite1
-		FixtureDef fixtureDef = new FixtureDef();
-		fixtureDef.shape = shape;
-		fixtureDef.density = 0.1f;
-		fixtureDef.restitution = 0.5f;
-		fixtureDef.filter.categoryBits = PHYSICS_ENTITY;
-		fixtureDef.filter.maskBits = WORLD_ENTITY;
-
-		body.createFixture(fixtureDef);
-
-		return body;
-	}
+//		bodyDef.position.set(51721, 50811);
 
 	@Override
 	public void create() {
@@ -114,7 +78,6 @@ public class Main extends ApplicationAdapter {
 		initInputHandler();
 
 		batch = new SpriteBatch();
-		world = new World(new Vector2(0, -gravityV), true);
 		camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 	}
 	
@@ -129,7 +92,7 @@ public class Main extends ApplicationAdapter {
 		
 		camera.update();
 		// Step the physics simulation forward at a rate of 60hz
-		world.step(1f / 60f, 6, 2);
+//		world.step(1f / 60f, 6, 2);
 		updateEntitysInputs();
 		updateCloudPositions();
 
@@ -168,7 +131,5 @@ public class Main extends ApplicationAdapter {
 		for (LocalPlayer p : players) {
 			p.cameraController.dispose();
 		}
-
-		world.dispose();
 	}
 }

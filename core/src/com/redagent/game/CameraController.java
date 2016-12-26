@@ -19,7 +19,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.redagent.entitys.Cloud;
 import com.redagent.entitys.Entity;
 import com.redagent.entitys.LocalPlayer;
-import com.redagent.helper.SpriteEntity;
 import com.redagent.materials.Grass;
 import com.redagent.materials.Sand;
 import com.redagent.world.Chunk;
@@ -39,7 +38,7 @@ public class CameraController {
 	private int width;
 	private int height;
 
-	public static float xAmount = 16;
+	public static float xAmount = 8;
 	// private int xAmountMax = 100;
 	public static int xAmountMax = 250;
 	public static int xAmountMin = 1;
@@ -67,7 +66,7 @@ public class CameraController {
 	}
 
 	public float getOnePixelSize() {
-		return getTileSizeByScreenSize() / MapTile.tileSize;
+		return getTileSizeByScreenSize() / MapTile.tileWidth;
 	}
 
 	public float getTileSizeByScreenSize() {
@@ -127,23 +126,24 @@ public class CameraController {
 		fboBatch.begin();
 
 		if (track != null) {
-			setCamera(track.body.getPosition());
+			setCamera(track.getPosition());
 		}
 
-		int xStart = (int) (camera.position.x - getXAmount() / 2) - 1;
-		int yStart = (int) (camera.position.y - getYAmount() / 2) - 6;
-		int xEnd = (int) (xStart + getXAmount() + 3);
-		int yEnd = (int) (yStart + getYAmount() + 7);
+		int xStart = (int) (camera.position.x - getXAmount() / 2);
+		int yStart = (int) (camera.position.y - getYAmount() / 2);
+		int xEnd = (int) (xStart + getXAmount());
+		int yEnd = (int) (yStart + getYAmount());
 
 		List<MapTile> area = TileWorld.getInstance().getArea(xStart, yStart, xEnd, yEnd);
 
 		float size = getTileSizeByScreenSize();
 		float scale = getOnePixelSize();
 
+		Collections.sort(area);
 		drawGround(area);
 
-		List<SpriteEntity> spriteEntitys = new ArrayList<SpriteEntity>();
-		spriteEntitys.addAll(area);
+		List<Entity> spriteEntitys = new ArrayList<Entity>();
+//		spriteEntitys.addAll(area);
 		spriteEntitys.addAll(Main.getInstance().cloudHandler.getClouds());
 		
 		
@@ -152,7 +152,7 @@ public class CameraController {
 		}
 		Collections.sort(spriteEntitys);
 
-		for (SpriteEntity e : spriteEntitys) {
+		for (Entity e : spriteEntitys) {
 			if (e instanceof MapTile) {
 				MapTile tile = (MapTile) e;
 				float x = tile.getGlobalX() - camera.position.x + getXAmount() / 2;
@@ -187,19 +187,23 @@ public class CameraController {
 			else if (e instanceof Entity) {
 				Entity t = (Entity) e;
 
-				Vector2 trackPos = t.getCoord();
+				Vector2 trackPos = t.getPosition();
 				Vector2 pos = new Vector2(trackPos.x - camera.position.x, trackPos.y - camera.position.y);
-				pos.add(getXAmount() / 2, getYAmount() / 2);
+				pos.add(getXAmount() / 2, getYAmount() / 2); 
 
 				for (Sprite sprite : t.getSprite()) {
-					sprite.setPosition((pos.x * size) - sprite.getWidth() / 2 * scale,
-							(pos.y * size) - sprite.getHeight() / 2 * scale);
+					
+					float screenX = (pos.x - pos.y) * MapTile.tileWidth/2;
+					float screenY = (pos.x + pos.y) * MapTile.tileHeight/2;
+					
+					sprite.setPosition((screenX),
+							(screenY));
 
 					// sprite.setRotation((float)
 					// Math.toDegrees(track.body.getAngle()));
 
 					fboBatch.draw(sprite, sprite.getX(), sprite.getY(), sprite.getOriginX(), sprite.getOriginY(),
-							sprite.getWidth() * scale, sprite.getHeight() * scale, sprite.getScaleX(),
+							sprite.getWidth(), sprite.getHeight(), sprite.getScaleX(),
 							sprite.getScaleY(), sprite.getRotation());
 					
 				
@@ -210,7 +214,7 @@ public class CameraController {
 				Cloud c = (Cloud) e;
 				
 				for (Sprite sprite : c.getSprite()) {
-					Vector2 trackPos = c.getCoord();
+					Vector2 trackPos = c.getPosition();
 					Vector2 pos = new Vector2(trackPos.x - camera.position.x, trackPos.y - camera.position.y);
 					
 					sprite.setPosition((pos.x * size) - sprite.getWidth() / 2 * scale,
@@ -237,24 +241,33 @@ public class CameraController {
 
 		for (MapTile tile : area) {
 			Sprite sprite = new Sprite(tile.getMaterialTexture());
-			float x = globalPosToScreenPosX(tile.getGlobalX());
-			float y = globalPosToScreenPosY(tile.getGlobalY());
+			float x = globalPosToScreenPosX(tile.getGlobalX(),tile.getGlobalY());
+			float y = globalPosToScreenPosY(tile.getGlobalX(),tile.getGlobalY());
 			
 			sprite.setPosition(x, y);
-			sprite.setOrigin(size/2, size/2);
-			sprite.setSize(sprite.getWidth() * scale, sprite.getHeight() * scale);
+//			sprite.setOrigin(sprite.getWidth()/2, sprite.getHeight()/2);
+//			sprite.setSize(MapTile.tileWidth * scale, sprite.getHeight() * scale);
 			
 			fboBatch.draw(sprite, sprite.getX(), sprite.getY(), sprite.getOriginX(),sprite.getOriginY(),
 					sprite.getWidth(), sprite.getHeight(), sprite.getScaleX(),
 					sprite.getScaleY(), tile.getRotation());
 			
+			float xt = tile.getGlobalX()-camera.position.x;
+			float yt = tile.getGlobalY()-camera.position.y;
+			String s = xt+" | "+yt;
+			font.draw(fboBatch, s, sprite.getX()+sprite.getWidth()/4, sprite.getY()+sprite.getHeight()*3.0f/4.0f);
+			
 			
 		}
 	}
 
-	private float globalPosToScreenPosX(int globalX) {
+	private float globalPosToScreenPosX(int globalX, int globalY) {
 		float size = getTileSizeByScreenSize();
-		return (globalX - camera.position.x + getXAmount() / 2) * size;
+		
+		float oldY = (globalY - camera.position.y) ;
+		float oldX = (globalX - camera.position.x) ;
+		
+		return (oldX-oldY)* MapTile.tileWidth/2;
 	}
 
 	private int screenPosToGlobalPosX(float screenX) {
@@ -262,9 +275,12 @@ public class CameraController {
 		return (int) (screenX / size + camera.position.x - getXAmount() / 2);
 	}
 
-	private float globalPosToScreenPosY(int globalY) {
+	private float globalPosToScreenPosY(int globalX, int globalY) {
 		float size = getTileSizeByScreenSize();
-		return (globalY - camera.position.y + getYAmount() / 2) * size;
+		float oldY = (globalY - camera.position.y ) ;
+		float oldX = (globalX - camera.position.x) ;
+		
+		return (oldX+oldY)* MapTile.tileHeight/2;
 	}
 
 	private int screenPosToGlobalPosY(float screenY) {
@@ -290,7 +306,7 @@ public class CameraController {
 			// int x = (int) camera.position.x;
 			// int y = (int) camera.position.y;
 
-			Vector2 bodyPos = track.body.getPosition().cpy();
+			Vector2 bodyPos = track.getPosition();
 
 			MapTile standOn = TileWorld.getInstance().getMapTileFromGlobalPos((int) bodyPos.x, (int) bodyPos.y);
 
@@ -309,7 +325,7 @@ public class CameraController {
 			if (standOn.nature != null) {
 				drawInformationLine("Nature: " + standOn.nature.texture);
 			}
-			drawInformationLine("Dir: " + track.body.getLinearVelocity().toString());
+//			drawInformationLine("Dir: " + track.body.getLinearVelocity().toString());
 
 			Vector2 mousePos = Main.getInstance().inputHandler.keyboardHandler.mouse.pos.cpy();
 
