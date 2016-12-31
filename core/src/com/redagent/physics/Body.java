@@ -13,6 +13,10 @@ public class Body implements Comparable<Body> {
 		setVelocity(velocity);
 		setAcceleration(acceleration);
 	}
+	
+	public Body(){
+		this(new Position(0, 0),new Position(0, 0),new Position(0, 0));
+	}
 
 	public Body(Position position) {
 		this(position, new Position(0, 0), new Position(0, 0));
@@ -29,6 +33,14 @@ public class Body implements Comparable<Body> {
 	public Body setPosition(Position newpos) {
 		this.position = newpos.cpy();
 		return this;
+	}
+	
+	public Body setPosition(int x, int y){
+		return setPosition(new Position(x,y));
+	}
+	
+	public Body setPosition(Body b){
+		return setPosition(b.position);
 	}
 
 	public void calcPhysicStep(float deltaTime) {

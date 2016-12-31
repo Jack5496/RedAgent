@@ -8,12 +8,9 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.math.Vector2;
 import com.redagent.Inputs.InputHandler;
-import com.redagent.entitys.CloudHandler;
 import com.redagent.entitys.LocalPlayer;
 import com.redagent.entitys.LocalPlayerHandler;
-import com.redagent.world.Chunk;
 import com.redagent.world.TileWorld;
 
 public class Main extends ApplicationAdapter {
@@ -40,7 +37,6 @@ public class Main extends ApplicationAdapter {
 	private static Main instance;
 	public LocalPlayerHandler playerHandler;
 	public InputHandler inputHandler;
-	public CloudHandler cloudHandler;
 
 	public void initResourceLoader() {
 		resourceLoader = new ResourceLoader();
@@ -57,10 +53,6 @@ public class Main extends ApplicationAdapter {
 	public void initPlayerHandler() {
 		playerHandler = new LocalPlayerHandler();
 	}
-	
-	public void initCloudHandler() {
-		cloudHandler = new CloudHandler();
-	}
 
 	public void initInputHandler() {
 		inputHandler = new InputHandler();
@@ -74,7 +66,6 @@ public class Main extends ApplicationAdapter {
 		initResourceLoader();
 		initTileWorld();
 		initPlayerHandler();
-		initCloudHandler();
 		initInputHandler();
 
 		batch = new SpriteBatch();
@@ -106,11 +97,7 @@ public class Main extends ApplicationAdapter {
 
 		renderForPlayers();
 	}
-	
-	public void updateCloudPositions(){
-		cloudHandler.updateClouds();
-	}
-	
+		
 	public void updateEntitysInputs() {
 		LocalPlayer[] players = playerHandler.getPlayers();
 

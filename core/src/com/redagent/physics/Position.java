@@ -125,6 +125,18 @@ public class Position implements Comparable<Position> {
 
 		return (1.0f * (xComp + yComp)) / comp;
 	}
+	
+	public static Position getPositionDirectionFromVector(Vector2 v) {
+		float a = v.angle();
+
+		if (a >= 45 && a <= 180 - 45)
+			return Direction.NORTH;
+		if (a > 180 - 45 && a < 180 + 45)
+			return Direction.WEST;
+		if (a >= 180 + 45 && a <= 360 - 45)
+			return Direction.SOUTH;
+		return Direction.EAST;
+	}
 
 	@Override
 	public int compareTo(Position o) {

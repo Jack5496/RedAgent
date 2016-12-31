@@ -54,9 +54,6 @@ public class KeyboardHandler {
 		if (keyboard.isPressed(Keys.A)) {
 			dir.add(new Vector2(-1, 0)); // left
 		}
-		if (keyboard.isPressed(Keys.Q)) {
-			dir.add(new Vector2(-1, 1)); // left
-		}
 		if (keyboard.isPressed(Keys.D)) {
 			dir.add(new Vector2(1, 0)); // right
 		}
@@ -66,25 +63,7 @@ public class KeyboardHandler {
 		if (keyboard.isPressed(Keys.S)) {
 			dir.add(new Vector2(0, -1)); // down
 		}
-		if (keyboard.isPressed(Keys.C)) {
-			if (cloud) {
-				Main.log(getClass(), "Spawn Cloud");
-				Main.getInstance().cloudHandler.spawnCloud(p.getPosition());
-				cloud = false;
-			}
-		}
-		if (keyboard.isPressed(Keys.UP)) {
-			Main.getInstance().cloudHandler.windDirection=Direction.NORTH;
-		}
-		if (keyboard.isPressed(Keys.RIGHT)) {
-			Main.getInstance().cloudHandler.windDirection=Direction.EAST;
-		}
-		if (keyboard.isPressed(Keys.DOWN)) {
-			Main.getInstance().cloudHandler.windDirection=Direction.SOUTH;
-		}
-		if (keyboard.isPressed(Keys.LEFT)) {
-			Main.getInstance().cloudHandler.windDirection=Direction.WEST;
-		}
+		
 
 		p.run(keyboard.isPressed(Keys.SHIFT_LEFT, Keys.SHIFT_RIGHT));
 		p.sneak(keyboard.isPressed(Keys.CONTROL_LEFT, Keys.CONTROL_RIGHT));

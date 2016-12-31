@@ -6,14 +6,15 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
 import com.redagent.game.Main;
 import com.redagent.physics.Body;
+import com.redagent.physics.Position;
 
 public class Entity extends Body{
 	
-	public Entity(float x, float y){
-		this(new Vector2(x,y));
+	public Entity(int x, int y){
+		this(new Position(x,y));
 	}
 	
-	public Entity(Vector2 position){
+	public Entity(Position position){
 		super(position);
 	}
 
