@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
+import com.redagent.game.Main;
 import com.redagent.physics.Body;
 
 public class Entity extends Body{

@@ -38,6 +38,10 @@ public class CameraController {
 	private int width;
 	private int height;
 
+	public static int zoomLevel = 0;
+	public static int zoomLevelmin = -2;
+	public static int zoomLevelmax = 3;
+
 	public static float xAmount = 8;
 	// private int xAmountMax = 100;
 	public static int xAmountMax = 250;
@@ -49,7 +53,7 @@ public class CameraController {
 
 	public CameraController(int width, int height) {
 		resize(width, height);
-		setCamera(0,0);
+		setCamera(0, 0);
 
 		font = new BitmapFont();
 		font.setColor(Color.BLACK);
@@ -129,12 +133,33 @@ public class CameraController {
 			setCamera(track.getPosition());
 		}
 
-		int xStart = (int) (camera.position.x - getXAmount() / 2);
-		int yStart = (int) (camera.position.y - getYAmount() / 2);
-		int xEnd = (int) (xStart + getXAmount());
-		int yEnd = (int) (yStart + getYAmount());
+		int amountToShow = 2;
+
+		int xStart = (int) (camera.position.x - amountToShow);
+		int yStart = (int) (camera.position.y - amountToShow);
+		int xEnd = (int) (xStart + amountToShow * 2);
+		int yEnd = (int) (yStart + amountToShow * 2);
 
 		List<MapTile> area = TileWorld.getInstance().getArea(xStart, yStart, xEnd, yEnd);
+
+		area = new ArrayList<MapTile>();
+
+		int xcenter = (int) (camera.position.x);
+		int ycenter = (int) (camera.position.y);
+
+		int safetytiles = 3;
+		int breite = (int) (this.width / (MapTile.tileWidth * getZoomLevelScaleFactor())) + safetytiles;
+		int höhe = (int) (this.height / (MapTile.tileHeight * getZoomLevelScaleFactor())) + safetytiles;
+
+		for (int a = -höhe + 1; a < höhe; a++) {
+			for (int b = -breite + 1; b < breite; b++) {
+				if ((b & 1) != (a & 1))
+					continue;
+				int x = (a + b) / 2;
+				int y = (a - b) / 2;
+				area.add(TileWorld.getInstance().getMapTileFromGlobalPos(xcenter + x, ycenter + y));
+			}
+		}
 
 		float size = getTileSizeByScreenSize();
 		float scale = getOnePixelSize();
@@ -143,10 +168,9 @@ public class CameraController {
 		drawGround(area);
 
 		List<Entity> spriteEntitys = new ArrayList<Entity>();
-//		spriteEntitys.addAll(area);
+		// spriteEntitys.addAll(area);
 		spriteEntitys.addAll(Main.getInstance().cloudHandler.getClouds());
-		
-		
+
 		if (track != null) {
 			spriteEntitys.add(track);
 		}
@@ -161,70 +185,64 @@ public class CameraController {
 				Texture n = tile.getNatureTexture();
 				if (n != null) {
 					Sprite sprite = new Sprite(n);
-					sprite.setPosition((x * size) + size/2-n.getWidth()/2*scale, (y * size));
+					sprite.setPosition((x * size) + size / 2 - n.getWidth() / 2 * scale, (y * size));
 
 					// fboBatch.draw(n, x * size, y * size, size / 2, size / 2,
 					// n.getWidth() * scale,
 					// n.getHeight() * scale, 1, 1, 0, 0, 0, n.getWidth(),
 					// n.getHeight(), false, false);
-					
-					fboBatch.draw(sprite, sprite.getX(), sprite.getY(), size / 2, size / 2,
-							sprite.getWidth() * scale, sprite.getHeight() * scale, sprite.getScaleX(),
-							sprite.getScaleY(), sprite.getRotation());
-					
-//					Sprite test = new Sprite(sprite);
-//					Color back = fboBatch.getColor();
-//					fboBatch.setColor(back.r/2, back.g/2, back.b/2, 64);
-//					
-//					fboBatch.draw(test, sprite.getX(), sprite.getY(), sprite.getOriginX(),sprite.getOriginY(),
-//							sprite.getWidth(), sprite.getHeight(), sprite.getScaleX(),
-//							sprite.getScaleY(), tile.getRotation());
-//					
-//					fboBatch.setColor(back);
-					
+
+					fboBatch.draw(sprite, sprite.getX(), sprite.getY(), size / 2, size / 2, sprite.getWidth() * scale,
+							sprite.getHeight() * scale, sprite.getScaleX(), sprite.getScaleY(), sprite.getRotation());
+
+					// Sprite test = new Sprite(sprite);
+					// Color back = fboBatch.getColor();
+					// fboBatch.setColor(back.r/2, back.g/2, back.b/2, 64);
+					//
+					// fboBatch.draw(test, sprite.getX(), sprite.getY(),
+					// sprite.getOriginX(),sprite.getOriginY(),
+					// sprite.getWidth(), sprite.getHeight(),
+					// sprite.getScaleX(),
+					// sprite.getScaleY(), tile.getRotation());
+					//
+					// fboBatch.setColor(back);
+
 				}
-			}
-			else if (e instanceof Entity) {
+			} else if (e instanceof Entity) {
 				Entity t = (Entity) e;
 
 				Vector2 trackPos = t.getPosition();
 				Vector2 pos = new Vector2(trackPos.x - camera.position.x, trackPos.y - camera.position.y);
-				pos.add(getXAmount() / 2, getYAmount() / 2); 
+				pos.add(getXAmount() / 2, getYAmount() / 2);
 
 				for (Sprite sprite : t.getSprite()) {
-					
-					float screenX = (pos.x - pos.y) * MapTile.tileWidth/2;
-					float screenY = (pos.x + pos.y) * MapTile.tileHeight/2;
-					
-					sprite.setPosition((screenX),
-							(screenY));
+
+					float screenX = (pos.x - pos.y) * MapTile.tileWidth / 2;
+					float screenY = (pos.x + pos.y) * MapTile.tileHeight / 2;
+
+					sprite.setPosition((screenX), (screenY));
 
 					// sprite.setRotation((float)
 					// Math.toDegrees(track.body.getAngle()));
 
 					fboBatch.draw(sprite, sprite.getX(), sprite.getY(), sprite.getOriginX(), sprite.getOriginY(),
-							sprite.getWidth(), sprite.getHeight(), sprite.getScaleX(),
-							sprite.getScaleY(), sprite.getRotation());
-					
-				
+							sprite.getWidth(), sprite.getHeight(), sprite.getScaleX(), sprite.getScaleY(),
+							sprite.getRotation());
 
 				}
-			}
-			else if(e instanceof Cloud){
+			} else if (e instanceof Cloud) {
 				Cloud c = (Cloud) e;
-				
+
 				for (Sprite sprite : c.getSprite()) {
 					Vector2 trackPos = c.getPosition();
 					Vector2 pos = new Vector2(trackPos.x - camera.position.x, trackPos.y - camera.position.y);
-					
+
 					sprite.setPosition((pos.x * size) - sprite.getWidth() / 2 * scale,
 							(pos.y * size) - sprite.getHeight() / 2 * scale);
 
 					fboBatch.draw(sprite, sprite.getX(), sprite.getY(), sprite.getOriginX(), sprite.getOriginY(),
 							sprite.getWidth() * scale, sprite.getHeight() * scale, sprite.getScaleX(),
 							sprite.getScaleY(), sprite.getRotation());
-					
-				
 
 				}
 			}
@@ -239,35 +257,59 @@ public class CameraController {
 		float size = getTileSizeByScreenSize();
 		float scale = getOnePixelSize();
 
+		float tileWidth = MapTile.tileWidth * getZoomLevelScaleFactor();
+		float tileHeight = MapTile.tileHeight * getZoomLevelScaleFactor();
+		float tileWidthHalf = tileWidth / 2.0f;
+		float tileHeightHalf = tileHeight / 2.0f;
+
+		MapTile bigger = area.get(area.size() / 2);
+
 		for (MapTile tile : area) {
 			Sprite sprite = new Sprite(tile.getMaterialTexture());
-			float x = globalPosToScreenPosX(tile.getGlobalX(),tile.getGlobalY());
-			float y = globalPosToScreenPosY(tile.getGlobalX(),tile.getGlobalY());
-			
-			sprite.setPosition(x, y);
-//			sprite.setOrigin(sprite.getWidth()/2, sprite.getHeight()/2);
-//			sprite.setSize(MapTile.tileWidth * scale, sprite.getHeight() * scale);
-			
-			fboBatch.draw(sprite, sprite.getX(), sprite.getY(), sprite.getOriginX(),sprite.getOriginY(),
-					sprite.getWidth(), sprite.getHeight(), sprite.getScaleX(),
-					sprite.getScaleY(), tile.getRotation());
-			
-			float xt = tile.getGlobalX()-camera.position.x;
-			float yt = tile.getGlobalY()-camera.position.y;
-			String s = xt+" | "+yt;
-			font.draw(fboBatch, s, sprite.getX()+sprite.getWidth()/4, sprite.getY()+sprite.getHeight()*3.0f/4.0f);
-			
-			
+			float x = globalPosToScreenPosX(tile.getGlobalX(), tile.getGlobalY(), tileWidthHalf);
+			float y = globalPosToScreenPosY(tile.getGlobalX(), tile.getGlobalY(), tileHeightHalf);
+
+			if (tile == bigger) {
+				Color save = fboBatch.getColor();
+
+				fboBatch.setColor(save.cpy().add(-0.5f, -0.5f, -0.5f, 0));
+				sprite = new Sprite(tile.getMaterialTexture());
+
+				sprite.setPosition(x, y);
+				sprite.setOrigin(tileWidthHalf, tileHeightHalf);
+				sprite.setSize(sprite.getWidth() * getZoomLevelScaleFactor(),
+						sprite.getHeight() * getZoomLevelScaleFactor());
+
+				fboBatch.draw(sprite, sprite.getX(), sprite.getY(), sprite.getOriginX(), sprite.getOriginY(),
+						sprite.getWidth(), sprite.getHeight(), sprite.getScaleX(), sprite.getScaleY(),
+						tile.getRotation());
+
+				fboBatch.setColor(save);
+			} else {
+				sprite = new Sprite(tile.getMaterialTexture());
+
+				sprite.setPosition(x, y);
+				sprite.setOrigin(tileWidthHalf, tileHeightHalf);
+				sprite.setSize(sprite.getWidth() * getZoomLevelScaleFactor(),
+						sprite.getHeight() * getZoomLevelScaleFactor());
+
+				fboBatch.draw(sprite, sprite.getX(), sprite.getY(), sprite.getOriginX(), sprite.getOriginY(),
+						sprite.getWidth(), sprite.getHeight(), sprite.getScaleX(), sprite.getScaleY(),
+						tile.getRotation());
+			}
 		}
 	}
 
-	private float globalPosToScreenPosX(int globalX, int globalY) {
-		float size = getTileSizeByScreenSize();
-		
-		float oldY = (globalY - camera.position.y) ;
-		float oldX = (globalX - camera.position.x) ;
-		
-		return (oldX-oldY)* MapTile.tileWidth/2;
+	private float getZoomLevelScaleFactor() {
+		return (float) Math.pow(2, zoomLevel);
+	}
+
+	private float globalPosToScreenPosX(int globalX, int globalY, float tileWidthHalf) {
+
+		float oldY = (globalY - camera.position.y);
+		float oldX = (globalX - camera.position.x);
+
+		return (oldX - oldY) * tileWidthHalf + this.width / 2;
 	}
 
 	private int screenPosToGlobalPosX(float screenX) {
@@ -275,12 +317,12 @@ public class CameraController {
 		return (int) (screenX / size + camera.position.x - getXAmount() / 2);
 	}
 
-	private float globalPosToScreenPosY(int globalX, int globalY) {
-		float size = getTileSizeByScreenSize();
-		float oldY = (globalY - camera.position.y ) ;
-		float oldX = (globalX - camera.position.x) ;
-		
-		return (oldX+oldY)* MapTile.tileHeight/2;
+	private float globalPosToScreenPosY(int globalX, int globalY, float tileHeightHalf) {
+
+		float oldY = (globalY - camera.position.y);
+		float oldX = (globalX - camera.position.x);
+
+		return (oldX + oldY) * tileHeightHalf + this.height / 2;
 	}
 
 	private int screenPosToGlobalPosY(float screenY) {
@@ -325,7 +367,8 @@ public class CameraController {
 			if (standOn.nature != null) {
 				drawInformationLine("Nature: " + standOn.nature.texture);
 			}
-//			drawInformationLine("Dir: " + track.body.getLinearVelocity().toString());
+			// drawInformationLine("Dir: " +
+			// track.body.getLinearVelocity().toString());
 
 			Vector2 mousePos = Main.getInstance().inputHandler.keyboardHandler.mouse.pos.cpy();
 
@@ -369,11 +412,11 @@ public class CameraController {
 	}
 
 	public void changeDistance(float amount) {
-		xAmount += amount;
-		if (xAmount < xAmountMin)
-			xAmount = xAmountMin;
-		if (xAmount > xAmountMax)
-			xAmount = xAmountMax;
+		zoomLevel += amount;
+		if (zoomLevel < zoomLevelmin)
+			zoomLevel = zoomLevelmin;
+		if (zoomLevel > zoomLevelmax)
+			zoomLevel = zoomLevelmax;
 	}
 
 	public void setTrack(Entity body) {

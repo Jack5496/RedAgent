@@ -1,68 +1,74 @@
 package com.redagent.physics;
 
-import com.badlogic.gdx.math.Vector2;
 import com.redagent.game.Main;
 
-public class Body implements Comparable<Body>{
+public class Body implements Comparable<Body> {
 
-	Vector2 position;
-	Vector2 velocity;
-	Vector2 acceleration;
-	
-	public Body(Vector2 position, Vector2 velocity, Vector2 acceleration){
+	Position position;
+	Position velocity;
+	Position acceleration;
+
+	public Body(Position position, Position velocity, Position acceleration) {
 		setPosition(position);
 		setVelocity(velocity);
 		setAcceleration(acceleration);
 	}
-	
-	public Body(Vector2 position){
-		this(position,new Vector2(0,0), new Vector2(0,0));
-	}
-	
-	public Body(Vector2 position, Vector2 velocity){
-		this(position,velocity, new Vector2(0,0));
+
+	public Body(Position position) {
+		this(position, new Position(0, 0), new Position(0, 0));
 	}
 
-	public Vector2 getPosition() {
+	public Body(Position position, Position velocity) {
+		this(position, velocity, new Position(0, 0));
+	}
+
+	public Position getPosition() {
 		return position.cpy();
 	}
-	
-	public Body setPosition(Vector2 newpos){
+
+	public Body setPosition(Position newpos) {
 		this.position = newpos.cpy();
 		return this;
-	}		
-	
-	public Body setVelocity(Vector2 velocity){
+	}
+
+	public void calcPhysicStep(float deltaTime) {
+		// float accelerationValue = getValueOfVector(acceleration);
+		float velocityValue = getValueOfVector(velocity);
+
+		// float accelerationAddition
+		//
+		// if(accelerationValue)
+
+		float velocityAdd = velocityValue * deltaTime;
+
+		setPosition(getPosition().add(getVelocity().setLength(velocityAdd)));
+	}
+
+	public float getValueOfVector(Position vec) {
+		return vec.lengthValue();
+	}
+
+	public Body setVelocity(Position velocity) {
 		this.velocity = velocity.cpy();
 		return this;
-	}		
-	
-	public Body setAcceleration(Vector2 acceleration){
+	}
+
+	public Position getVelocity() {
+		return this.velocity.cpy();
+	}
+
+	public Body addVelocity(Position velocityAdiition) {
+		return setVelocity(getVelocity().add(velocityAdiition));
+	}
+
+	public Body setAcceleration(Position acceleration) {
 		this.acceleration = acceleration.cpy();
 		return this;
-	}		
-	
+	}
+
 	@Override
 	public int compareTo(Body o) {
-		float me = this.position.x+this.position.y;
-		float other = o.position.x+o.position.y;
-		
-		if(me>other){
-			return -1;
-		}
-		if(me<other){
-			return 1;
-		}
-		
-		//both bodys same vertical height
-		if(this.position.x<o.position.x){
-			return 1;
-		}
-		if(this.position.x>o.position.x){
-			return -1;
-		}
-		
-		return 0;
+		return this.position.compareTo(o.position);
 	}
-	
+
 }

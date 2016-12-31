@@ -93,9 +93,14 @@ public class Main extends ApplicationAdapter {
 		camera.update();
 		// Step the physics simulation forward at a rate of 60hz
 //		world.step(1f / 60f, 6, 2);
+		
 		updateEntitysInputs();
-		updateCloudPositions();
+//		updateCloudPositions();
 
+		float deltaTime = Gdx.graphics.getDeltaTime();
+		updatePhysics(deltaTime);
+		
+		
 		Gdx.gl.glClearColor(1, 1, 1, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
@@ -111,6 +116,18 @@ public class Main extends ApplicationAdapter {
 
 		for (LocalPlayer p : players) {
 			p.updateMyGameObjects();
+		}
+	}
+	
+	public void updatePhysics(float deltaTime) {
+		updateEntitysBodys(deltaTime);
+	}
+	
+	public void updateEntitysBodys(float deltaTime) {
+		LocalPlayer[] players = playerHandler.getPlayers();
+
+		for (LocalPlayer p : players) {
+			p.calcPhysicStep(deltaTime);
 		}
 	}
 

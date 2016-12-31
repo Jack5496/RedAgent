@@ -76,7 +76,6 @@ public class LocalPlayer extends Entity {
 	}
 	
 	private void updateLeftStick() {
-		
 		if (this.stickLeft.len() != 0) {
 			this.direction = VectorHelper.getDirFromVector(this.stickLeft);
 		}
@@ -98,55 +97,6 @@ public class LocalPlayer extends Entity {
 
 	public void updateMyGameObjects() {
 		updateLeftStick();
-		checkValidPosition();
-	}
-
-	private void checkValidPosition() {
-		Vector2 pos = getPosition();
-
-		if (!validPosition(pos)) {
-			Vector2 diff = pos.cpy();
-			diff = diff.sub(getPosition());
-
-			Vector2 dx = diff.cpy();
-			dx.x = 0;
-
-			Vector2 dy = diff.cpy();
-			dy.y = 0;
-
-			Vector2 op1 = getPosition().add(dx);
-			Vector2 op2 = getPosition().add(dy);
-
-			Vector2 move = getPosition();
-
-			if (validPosition(op1)) {
-				move = op1.cpy();
-			} else if (validPosition(op2)) {
-				move = op2.cpy();
-			}
-
-//			body.setTransform(move, body.getAngle());
-		}
-
-//		lastPos = body.getPosition().cpy();
-	}
-
-	private boolean validPosition(Vector2 pos) {
-		Vector2 v = pos.cpy();		
-		
-		try {
-			MapTile my = TileWorld.getInstance().getMapTileFromGlobalPos((int) v.x, (int) v.y);
-			if (my.material instanceof Water) {
-				return false;
-			}
-			if (my.isSolid()) {
-				return false;
-			}
-		} catch (NullPointerException e) {
-
-		}
-
-		return true;
 	}
 
 }
